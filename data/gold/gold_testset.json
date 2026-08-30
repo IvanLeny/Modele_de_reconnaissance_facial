@@ -1,0 +1,153 @@
+{
+  "_comment": "Jeu de test annoté (chapitre 4.1). Pour chaque question : le(s) passage(s) pertinent(s) au niveau (document, page) servent aux metriques de recuperation (nDCG, MRR, P@k) ; 'gold_numbers' liste des donnees chiffrees exactes attendues (exactitude chiffree, H3) ; 'internal_only' marque une information presente uniquement dans un document interne, utilisee pour tester le cloisonnement du mode consultation. Pages = numero de page du PDF (1-based).",
+  "questions": [
+    {
+      "id": "Q01",
+      "question": "Quel est le nombre d'entreprises en activité et le nombre de PME estimés en 2023 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "annuaire_statistique_2022", "pages": [14]}],
+      "gold_numbers": ["393 954", "393 166"],
+      "reference": "393 954 entreprises en activité dont 393 166 PME en 2023."
+    },
+    {
+      "id": "Q02",
+      "question": "Vers quel secteur d'activité les PME sont-elles majoritairement orientées en 2023 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "annuaire_statistique_2022", "pages": [14, 15]}],
+      "gold_numbers": ["75,95"],
+      "reference": "Majoritairement le tertiaire (75,95%)."
+    },
+    {
+      "id": "Q03",
+      "question": "Quelle est la répartition du stock des PME estimé en 2023 selon la région, notamment à Yaoundé ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "annuaire_statistique_2022", "pages": [16]}],
+      "gold_numbers": ["93 967", "23,9"],
+      "reference": "Yaoundé concentre 93 967 PME (23,9%)."
+    },
+    {
+      "id": "Q04",
+      "question": "Combien de PME ont été créées dans le CFCE de Yaoundé en 2023 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "annuaire_statistique_2022", "pages": [17]}],
+      "gold_numbers": ["9 168", "46,65"],
+      "reference": "9 168 PME créées à Yaoundé en 2023 (46,65% du total des CFCE)."
+    },
+    {
+      "id": "Q05",
+      "question": "Comment ont évolué les crédits accordés par la BC-PME selon la branche d'activité ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "annuaire_statistique_2022", "pages": [43]}],
+      "gold_numbers": [],
+      "reference": "Le Tableau 47 présente l'évolution des crédits BC-PME par branche entre 2018 et 2023 (en millions de FCFA)."
+    },
+    {
+      "id": "Q06",
+      "question": "Quelle proportion de PME déclarait une trésorerie difficile au 2e trimestre 2024 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T2_2024", "pages": [11]}],
+      "gold_numbers": ["69,80", "8,70"],
+      "reference": "Plus de 69,80% des PME déclarent une trésorerie difficile ; 8,70% une trésorerie aisée."
+    },
+    {
+      "id": "Q07",
+      "question": "À combien s'est établie l'inflation au Cameroun au 2e trimestre 2024 et quelle est la norme communautaire ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T2_2024", "pages": [7, 13]}],
+      "gold_numbers": ["5,7", "3"],
+      "reference": "L'inflation s'est modérée à 5,7%, au-dessus de la norme communautaire de 3%."
+    },
+    {
+      "id": "Q08",
+      "question": "Quel a été le taux de croissance économique du Cameroun au 2e trimestre 2024 ?",
+      "mode": "consultation",
+      "relevant": [{"doc_id": "note_conjoncture_T2_2024", "pages": [13]}],
+      "gold_numbers": ["3,9", "3,2"],
+      "reference": "La croissance s'est redressée à 3,9% après 3,2% en 2023."
+    },
+    {
+      "id": "Q09",
+      "question": "À combien s'établit la croissance économique mondiale au 3e trimestre 2024 ?",
+      "mode": "consultation",
+      "relevant": [{"doc_id": "note_conjoncture_T3_2024", "pages": [5]}],
+      "gold_numbers": ["2,4", "2,6"],
+      "reference": "La croissance mondiale a ralenti à 2,4%, contre 2,6% au trimestre précédent."
+    },
+    {
+      "id": "Q10",
+      "question": "Quelle part des chefs d'entreprise jugeait les coûts de production compétitifs au 3e trimestre 2024 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T3_2024", "pages": [9]}],
+      "gold_numbers": ["73,8"],
+      "reference": "73,8% des chefs d'entreprise trouvaient ces coûts compétitifs (stables ou en baisse)."
+    },
+    {
+      "id": "Q11",
+      "question": "Dans quels domaines se retrouvent les emplois créés par les PME au 3e trimestre 2024 ?",
+      "mode": "consultation",
+      "relevant": [{"doc_id": "note_conjoncture_T3_2024", "pages": [12]}],
+      "gold_numbers": ["60", "26", "14"],
+      "reference": "Commerce général (60%), services (26%) et transformation agroalimentaire (14%)."
+    },
+    {
+      "id": "Q12",
+      "question": "Comment a évolué la perception d'un résultat net négatif chez les PME entre le T2 et le T3 2024 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T3_2024", "pages": [11]}],
+      "gold_numbers": ["48,7", "47,6", "50,7"],
+      "reference": "48,7% en T2_2024, 47,6% en T3_2024, contre 50,7% en T3_2023."
+    },
+    {
+      "id": "Q13",
+      "question": "Quelle est la hausse des prix à la production industrielle au 3e trimestre 2024 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T3_2024", "pages": [7]}],
+      "gold_numbers": ["5,7"],
+      "reference": "Hausse de +5,7% en glissement annuel."
+    },
+    {
+      "id": "Q14",
+      "question": "À combien la croissance de la zone CEMAC a-t-elle été révisée au 1er trimestre 2025 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T1_2025", "pages": [6]}],
+      "gold_numbers": ["2,4", "2,9"],
+      "reference": "Révisée à 2,4%, en léger recul par rapport aux prévisions initiales de 2,9%.",
+      "internal_only": true
+    },
+    {
+      "id": "Q15",
+      "question": "Quelles mesures d'appui aux PME ont été prises au 1er trimestre 2025 (nombre d'entreprises appuyées) ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T1_2025", "pages": [13]}],
+      "gold_numbers": ["200", "50", "160", "500", "100"],
+      "reference": "Appui à 200 entreprises, 50 entreprises aux foires, crédits bonifiés à plus de 160 PME, renforcement de 500 PME et certification pour 100 entreprises.",
+      "internal_only": true
+    },
+    {
+      "id": "Q16",
+      "question": "Quel était le taux de couverture de l'enquête PME au 1er trimestre 2025 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T1_2025", "pages": [17]}],
+      "gold_numbers": ["500", "432", "86.4"],
+      "reference": "500 PME à enquêter, 432 répondantes, soit un taux de couverture de 86,4%.",
+      "internal_only": true
+    },
+    {
+      "id": "Q17",
+      "question": "Quelle proportion de PME estimait sa trésorerie soutenable au 1er trimestre 2025 ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T1_2025", "pages": [11]}],
+      "gold_numbers": ["30,6"],
+      "reference": "30,6% des PME estiment leur trésorerie soutenable (normale ou aisée).",
+      "internal_only": true
+    },
+    {
+      "id": "Q18",
+      "question": "Quelle proportion des PME a déclaré une hausse des dépenses de production au 2e trimestre 2024 et pour quelle raison principale ?",
+      "mode": "production",
+      "relevant": [{"doc_id": "note_conjoncture_T2_2024", "pages": [9]}],
+      "gold_numbers": ["5,9", "38,4"],
+      "reference": "Hausse évaluée à 5,9%, majoritairement due à la hausse des prix des matières premières (38,4%)."
+    }
+  ]
+}

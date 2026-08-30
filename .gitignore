@@ -205,3 +205,8 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# --- Système RAG MINPMEESA ---
+# Index régénérable via `python -m rag_minpmeesa.app.cli build` (volumineux)
+data/index/
+# Le rapport d'évaluation (data/results/) est versionné comme livrable.

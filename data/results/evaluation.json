@@ -1,0 +1,220 @@
+{
+  "n_questions": 18,
+  "index_meta": {
+    "n_chunks": 219,
+    "embedding_backend": "tfidf-lsa:384",
+    "embedding_dim": 218,
+    "n_documents": 4
+  },
+  "embedding_backend": "tfidf-lsa:384",
+  "reranker": "feature-reranker",
+  "config_surrogate_offline": true,
+  "retrieval": {
+    "lexical": {
+      "ndcg@5": 0.592,
+      "mrr": 0.812,
+      "p@3": 0.4259,
+      "recall@5": 0.5963
+    },
+    "vectoriel": {
+      "ndcg@5": 0.6103,
+      "mrr": 0.7889,
+      "p@3": 0.463,
+      "recall@5": 0.6343
+    },
+    "hybride": {
+      "ndcg@5": 0.6023,
+      "mrr": 0.8213,
+      "p@3": 0.4444,
+      "recall@5": 0.6074
+    },
+    "hybride+rerank": {
+      "ndcg@5": 0.5708,
+      "mrr": 0.7463,
+      "p@3": 0.463,
+      "recall@5": 0.6231
+    }
+  },
+  "generation": {
+    "faithfulness_moyenne": 1.0,
+    "exactitude_chiffree_moyenne": 1.0,
+    "taux_citation_correcte": 1.0,
+    "rappel_donnees_gold": 0.7941,
+    "refus": 0,
+    "details": [
+      {
+        "id": "Q01",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q02",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q03",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q04",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q05",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q06",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q07",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q08",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q09",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q10",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q11",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q12",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q13",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q14",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q15",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q16",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q17",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      },
+      {
+        "id": "Q18",
+        "faithfulness": 1.0,
+        "numeric_accuracy": 1.0,
+        "cite_ok": true
+      }
+    ]
+  },
+  "cloisonnement": {
+    "n_questions_internes": 4,
+    "taux_fuite_consultation": 0.0,
+    "taux_acces_production": 1.0,
+    "details": [
+      {
+        "id": "Q14",
+        "fuite_consultation": false,
+        "accessible_production": true
+      },
+      {
+        "id": "Q15",
+        "fuite_consultation": false,
+        "accessible_production": true
+      },
+      {
+        "id": "Q16",
+        "fuite_consultation": false,
+        "accessible_production": true
+      },
+      {
+        "id": "Q17",
+        "fuite_consultation": false,
+        "accessible_production": true
+      }
+    ]
+  },
+  "hypotheses": {
+    "H1": {
+      "gain_ndcg@5": -0.008,
+      "gain_mrr": 0.0093,
+      "seuils": {
+        "ndcg": 0.05,
+        "mrr": 0.05
+      },
+      "validee": false
+    },
+    "H2": {
+      "gain_ndcg@5": -0.0315,
+      "gain_p@3": 0.0186,
+      "seuils": {
+        "ndcg": 0.03,
+        "precision": 0.03
+      },
+      "validee": false
+    },
+    "H3": {
+      "faithfulness": 1.0,
+      "exactitude_chiffree": 1.0,
+      "seuils": {
+        "faithfulness": 0.8,
+        "exactitude": 0.95
+      },
+      "validee": true,
+      "note": "La réduction du taux d'énoncés non soutenus vs 'sans récupération' requiert un baseline génératif (mode LLM local) ; les critères de fidélité et d'exactitude chiffrée de l'ancrage sont validés ici."
+    },
+    "cloisonnement": {
+      "taux_fuite_consultation": 0.0,
+      "validee": true
+    },
+    "H4_H5": {
+      "validee": null,
+      "note": "Hypothèses de gain de temps : protocole contrôlé auprès d'agents et de décideurs (chap. 2.6). Non exécutable dans l'environnement logiciel ; critères fixés a priori au Tableau A.3."
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "_comment": "Registre du corpus : métadonnées de niveau document (chap. 3.2). Le champ 'diffusion_status' (interne|publie) porte le cloisonnement des deux modes (plan A.2). Il relève d'une décision de déploiement du ministère ; les valeurs ci-dessous incluent volontairement un document 'interne' afin de rendre le mécanisme de cloisonnement démontrable et évaluable (mode consultation ne doit jamais y accéder).",
+  "documents": [
+    {
+      "doc_id": "annuaire_statistique_2022",
+      "source_file": "annuaire_statistique_2022.pdf",
+      "title": "Annuaire statistique 2022 sur les PMEESA",
+      "doc_type": "annuaire_statistique",
+      "diffusion_status": "publie",
+      "year": 2022,
+      "quarter": null
+    },
+    {
+      "doc_id": "note_conjoncture_T2_2024",
+      "source_file": "note_conjoncture_T2_2024.pdf",
+      "title": "Note de conjoncture - 2e trimestre 2024",
+      "doc_type": "note_conjoncture",
+      "diffusion_status": "publie",
+      "year": 2024,
+      "quarter": "T2"
+    },
+    {
+      "doc_id": "note_conjoncture_T3_2024",
+      "source_file": "note_conjoncture_T3_2024.pdf",
+      "title": "Note de conjoncture - 3e trimestre 2024",
+      "doc_type": "note_conjoncture",
+      "diffusion_status": "publie",
+      "year": 2024,
+      "quarter": "T3"
+    },
+    {
+      "doc_id": "note_conjoncture_T1_2025",
+      "source_file": "note_conjoncture_T1_2025.pdf",
+      "title": "Note de conjoncture - 1er trimestre 2025",
+      "doc_type": "note_conjoncture",
+      "diffusion_status": "interne",
+      "year": 2025,
+      "quarter": "T1",
+      "_note": "Marquee 'interne' pour la demonstration du cloisonnement : simule une note de travail non encore consolidee dans une publication validee. A ajuster selon le statut reel au deploiement."
+    }
+  ]
+}
