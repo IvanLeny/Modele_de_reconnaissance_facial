@@ -10,6 +10,17 @@ Lancement :
 """
 from __future__ import annotations
 
+import os
+import sys
+
+# Streamlit exécute ce fichier comme un script isolé : la racine du projet n'est
+# alors pas sur le chemin d'import et le paquet `rag_minpmeesa` reste introuvable.
+# On l'ajoute explicitement (trois niveaux au-dessus de ce fichier) avant tout
+# import du paquet, de sorte que `streamlit run …` fonctionne depuis n'importe où.
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 import streamlit as st
 
 from rag_minpmeesa.config import Mode, get_settings
