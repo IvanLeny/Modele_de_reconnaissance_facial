@@ -210,3 +210,6 @@ __marimo__/
 # Index régénérable via `python -m rag_minpmeesa.app.cli build` (volumineux)
 data/index/
 # Le rapport d'évaluation (data/results/) est versionné comme livrable.
+
+# Marqueur du lanceur (genere localement)
+installation_ok.txt

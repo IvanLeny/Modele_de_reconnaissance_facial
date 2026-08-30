@@ -14,6 +14,21 @@ réponses **sourcées**, avec une garantie forte sur les **données chiffrées**
 
 ---
 
+## 🚀 Démarrage en un clic
+
+Une fois le projet sur votre ordinateur (`git clone …` puis `git checkout claude/rag-system-memoir-ra02r7`) :
+
+- **Windows** : double-cliquez sur **`demarrer.bat`** (ou, dans le dossier du projet, tapez `demarrer.bat`).
+- **macOS / Linux** : dans le dossier du projet, tapez `bash demarrer.sh`.
+
+Le lanceur installe les dépendances (la 1re fois), construit l'index (la 1re fois,
+1 à 2 minutes) puis ouvre l'application dans votre navigateur. Les fois suivantes,
+il ouvre directement l'application. Pour l'arrêter : `Ctrl+C` dans la fenêtre.
+
+> Tout se passe **localement** sur votre machine ; le corpus est déjà inclus dans `data/corpus/`.
+
+---
+
 ## 1. Ce que fait le système
 
 - **Ingère** l'Annuaire statistique et les Notes de conjoncture (PDF) : extraction
