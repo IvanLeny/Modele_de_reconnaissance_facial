@@ -84,7 +84,9 @@ docs/                     # ARCHITECTURE.md + plan du mémoire
 tests/                    # tests unitaires et d'intégration
 ```
 
-Une **carte détaillée code ↔ mémoire** figure dans [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Documentation détaillée :
+- [`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md) — **outils utilisés et fonctionnalités** (guide complet).
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — carte détaillée code ↔ chapitres du mémoire.
 
 ## 3. Installation
 

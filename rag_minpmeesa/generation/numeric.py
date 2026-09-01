@@ -119,6 +119,45 @@ class NumericAudit:
                 "unsupported": self.unsupported, "accuracy": round(self.accuracy, 4)}
 
 
+_YEAR_RE = re.compile(r"^(19|20)\d{2}$")
+
+
+def is_meaningful_figure(mention: NumberMention) -> bool:
+    """
+    Vrai si la mention est une STATISTIQUE exploitable et non un simple repère :
+      - un pourcentage (69,80 %) ou une décimale (5,7) ;
+      - un grand entier (>= 3 chiffres, ex. 393 166) ;
+    et FAUX pour un ordinal isolé (1, 2, 5) ou un millésime seul (2023).
+    """
+    canon = mention.canonical
+    if mention.is_percent or re.search(r"\d[.,]\d", canon):
+        return True
+    digits = re.sub(r"\D", "", canon)
+    if len(digits) >= 3:
+        if len(digits) == 4 and _YEAR_RE.match(digits):   # millésime seul
+            return False
+        return True
+    return False
+
+
+def key_figures(text: str) -> List[str]:
+    """
+    Extrait les chiffres-clés lisibles d'un texte, dédoublonnés et suffixés du
+    symbole « % » lorsqu'il s'applique. Destiné à la colonne « Données chiffrées »
+    de la fiche de collecte : on ne garde que ce qui est réellement exploitable.
+    """
+    out, seen = [], set()
+    for m in extract_numbers(text):
+        if not is_meaningful_figure(m):
+            continue
+        label = m.raw + (" %" if m.is_percent else "")
+        key = re.sub(r"\s+", "", label)
+        if key not in seen:
+            seen.add(key)
+            out.append(label)
+    return out
+
+
 def audit_numbers(answer_text: str, source_texts: List[str]) -> NumericAudit:
     """Audite tous les nombres d'une réponse au regard des passages sources."""
     audit = NumericAudit()

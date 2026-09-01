@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List
 
 from .config import Mode
-from .generation.numeric import extract_numbers
+from .generation.numeric import key_figures
 
 
 # Rubriques de l'Annuaire statistique des PMEESA et requêtes associées.
@@ -80,7 +80,11 @@ def collect_rubrique(engine, rubrique: str, mode: Mode = Mode.PRODUCTION,
             continue
         n = 0
         for s in ans.sentences:
-            nums = [m.raw for m in extract_numbers(s.text)]
+            nums = key_figures(s.text)
+            # On ne retient, pour la collecte, que les constats effectivement
+            # porteurs d'une donnée chiffrée exploitable.
+            if not nums:
+                continue
             key = s.text[:80].lower()
             if key in seen:
                 continue

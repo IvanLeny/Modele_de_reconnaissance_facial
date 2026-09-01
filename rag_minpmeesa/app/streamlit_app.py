@@ -60,38 +60,81 @@ def reset_engine():
 def inject_css():
     st.markdown(f"""
     <style>
-      .stApp {{ background: #f7f9f7; }}
+      /* Bandeau tricolore en haut de page */
+      .stApp {{ background:
+        linear-gradient(180deg, #eef6ef 0%, #f7faf7 220px, #f7faf7 100%); }}
+      .stApp::before {{
+        content:""; position:fixed; top:0; left:0; right:0; height:6px; z-index:1000;
+        background: linear-gradient(90deg, {VERT} 0 34%, {ROUGE} 34% 67%, {JAUNE} 67% 100%);
+      }}
+
+      /* En-tête */
       .entete {{
         display:flex; align-items:center; gap:18px;
-        background: linear-gradient(120deg, {VERT} 0%, #0e8a44 60%, {VERT} 100%);
-        padding:18px 24px; border-radius:14px; color:white;
-        box-shadow:0 4px 14px rgba(0,0,0,.12);
-        border-bottom:5px solid {JAUNE};
+        background: linear-gradient(120deg, {VERT} 0%, #0e9a4c 55%, #0a6e35 100%);
+        padding:20px 26px; border-radius:16px; color:white; margin-top:6px;
+        box-shadow:0 6px 20px rgba(11,122,59,.28);
+        border-bottom:6px solid {JAUNE};
       }}
-      .entete h1 {{ font-size:1.55rem; margin:0; color:white; }}
-      .entete p  {{ margin:2px 0 0; opacity:.92; font-size:.95rem; }}
+      .entete h1 {{ font-size:1.6rem; margin:0; color:white; letter-spacing:.3px; }}
+      .entete p  {{ margin:4px 0 0; opacity:.95; font-size:.95rem; }}
       .monogramme {{
-        width:64px; height:64px; border-radius:50%;
+        width:66px; height:66px; border-radius:50%;
         background: conic-gradient({ROUGE} 0 33%, {JAUNE} 33% 66%, {VERT} 66% 100%);
         display:flex; align-items:center; justify-content:center;
         font-weight:800; color:white; font-size:.72rem; text-align:center;
-        border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,.2);
+        border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,.25);
       }}
-      .badge-mode {{ display:inline-block; padding:3px 12px; border-radius:20px;
-        font-size:.8rem; font-weight:700; color:white; }}
-      .rep-card {{
-        background:white; border-left:6px solid {VERT};
-        padding:16px 20px; border-radius:10px; margin-bottom:6px;
-        box-shadow:0 2px 8px rgba(0,0,0,.06);
-      }}
-      .cite {{ color:{VERT}; font-style:italic; font-size:.86rem; }}
-      .stButton>button {{
-        background:{VERT}; color:white; border:none; border-radius:8px;
-        font-weight:600; padding:.5rem 1.1rem;
-      }}
-      .stButton>button:hover {{ background:{ROUGE}; color:white; }}
-      div[data-testid="stMetricValue"] {{ color:{VERT}; }}
+      .badge-mode {{ display:inline-block; padding:4px 14px; border-radius:20px;
+        font-size:.82rem; font-weight:700; color:white; box-shadow:0 2px 6px rgba(0,0,0,.15); }}
+
+      /* Onglets colorés */
+      .stTabs [data-baseweb="tab-list"] {{ gap:6px; border-bottom:2px solid #d8e6da; }}
+      .stTabs [data-baseweb="tab"] {{
+        background:#eaf3ec; border-radius:10px 10px 0 0; padding:8px 16px;
+        font-weight:600; color:#0a5c2c; }}
+      .stTabs [aria-selected="true"] {{
+        background:{VERT} !important; color:white !important; }}
+
+      /* Titres de section avec barre d'accent */
       h2, h3 {{ color:{VERT}; }}
+      .stTabs h3, .stTabs h4 {{
+        border-left:5px solid {JAUNE}; padding-left:10px; }}
+
+      /* Cartes de réponse : accent alternant vert / jaune / rouge */
+      .rep-card {{
+        background:white; padding:14px 18px; border-radius:10px; margin-bottom:8px;
+        box-shadow:0 2px 10px rgba(0,0,0,.07); border-left:6px solid {VERT}; }}
+      .rep-card.acc1 {{ border-left-color:{JAUNE}; }}
+      .rep-card.acc2 {{ border-left-color:{ROUGE}; }}
+      .cite {{ color:{VERT}; font-style:italic; font-size:.86rem; font-weight:600; }}
+
+      /* Boutons */
+      .stButton>button, .stDownloadButton>button {{
+        background:{VERT}; color:white; border:none; border-radius:9px;
+        font-weight:700; padding:.55rem 1.15rem; box-shadow:0 2px 8px rgba(11,122,59,.3); }}
+      .stButton>button:hover, .stDownloadButton>button:hover {{
+        background:{ROUGE}; color:white; }}
+      .stForm button[kind="secondaryFormSubmit"], .stForm button {{ background:{VERT}; }}
+
+      /* Métriques : encadré coloré */
+      div[data-testid="stMetric"] {{
+        background:white; border-radius:12px; padding:12px 16px;
+        border-top:4px solid {JAUNE}; box-shadow:0 2px 8px rgba(0,0,0,.06); }}
+      div[data-testid="stMetricValue"] {{ color:{VERT}; font-weight:800; }}
+
+      /* Barre latérale teintée */
+      section[data-testid="stSidebar"] {{
+        background: linear-gradient(180deg, #f0f7f1 0%, #e7f2e9 100%);
+        border-right:3px solid {VERT}; }}
+      section[data-testid="stSidebar"] h3 {{ color:{VERT}; }}
+
+      /* Champs de saisie */
+      .stTextInput input {{ border:1.5px solid #cfe3d4; border-radius:8px; }}
+      .stTextInput input:focus {{ border-color:{VERT}; box-shadow:0 0 0 2px rgba(11,122,59,.15); }}
+
+      /* En-têtes de tableau */
+      .stDataFrame thead tr th {{ background:{VERT} !important; color:white !important; }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -155,9 +198,11 @@ def tab_interroger(engine, mode: Mode):
             return
 
         st.markdown("#### Réponse")
-        for s in ans.sentences:
+        for i, s in enumerate(ans.sentences):
+            acc = ["", "acc1", "acc2"][i % 3]
             st.markdown(
-                f'<div class="rep-card">{s.text}<br><span class="cite">{s.citation}</span></div>',
+                f'<div class="rep-card {acc}">{s.text}<br>'
+                f'<span class="cite">{s.citation}</span></div>',
                 unsafe_allow_html=True)
 
         m1, m2, m3 = st.columns(3)
