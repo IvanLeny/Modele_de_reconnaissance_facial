@@ -114,6 +114,10 @@ def render_header():
       </div>
     </div>
     """, unsafe_allow_html=True)
+    # Bannière institutionnelle (photo / Journées nationales de la PME) si déposée.
+    banniere = admin.find_asset("banniere")
+    if banniere:
+        st.image(str(banniere), use_container_width=True)
 
 
 # --------------------------------------------------------------------------- #
@@ -267,12 +271,22 @@ def tab_admin():
             reset_engine()
         st.success(f"Index reconstruit : {meta}")
 
-    st.markdown("##### Logo de la structure")
-    logo_file = st.file_uploader("Déposer le logo (PNG/JPG/SVG)", type=["png", "jpg", "jpeg", "svg"])
-    if logo_file is not None:
-        ext = logo_file.name.rsplit(".", 1)[-1]
-        admin.save_logo(logo_file.getvalue(), extension=ext)
-        st.success("Logo enregistré. Rechargez la page pour le voir dans l'en-tête.")
+    st.markdown("##### Images de l'application (logo, bannière, couverture)")
+    st.caption("Déposez chaque image ; elle s'affiche après rechargement de la page.")
+    for name, label in admin.ASSET_NAMES.items():
+        current = admin.find_asset(name)
+        cols = st.columns([3, 1])
+        up = cols[0].file_uploader(label, type=["png", "jpg", "jpeg", "svg", "webp"],
+                                   key=f"asset_{name}")
+        if current:
+            try:
+                cols[1].image(str(current), width=90)
+            except Exception:
+                cols[1].caption("déposée ✓")
+        if up is not None:
+            ext = up.name.rsplit(".", 1)[-1]
+            admin.save_asset(name, up.getvalue(), extension=ext)
+            st.success(f"« {label} » enregistrée. Rechargez la page pour la voir.")
 
 
 # --------------------------------------------------------------------------- #
@@ -296,6 +310,11 @@ def main():
         if mode == Mode.CONSULTATION:
             st.info("🔒 Cloisonnement actif : les documents internes non validés "
                     "sont inaccessibles.")
+        couverture = admin.find_asset("couverture")
+        if couverture:
+            st.divider()
+            st.markdown("### Dernier Annuaire")
+            st.image(str(couverture), use_container_width=True)
         st.divider()
         st.markdown("### Index")
         st.json(engine.store.meta, expanded=False)

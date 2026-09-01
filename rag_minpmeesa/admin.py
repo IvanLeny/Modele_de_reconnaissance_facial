@@ -151,22 +151,41 @@ def rebuild_index(verbose: bool = False) -> dict:
     return eng.store.meta
 
 
-def save_logo(file_bytes: bytes, extension: str = "png") -> Path:
-    """Enregistre le logo de la structure pour l'en-tête de l'interface."""
-    assets = Path(__file__).resolve().parent / "app" / "assets"
-    assets.mkdir(parents=True, exist_ok=True)
-    # nettoie les anciens logos
-    for old in assets.glob("logo.*"):
+_ASSETS = Path(__file__).resolve().parent / "app" / "assets"
+
+# Ressources visuelles reconnues par l'interface (chap. 3.7).
+ASSET_NAMES = {
+    "logo": "Logo de la structure (en-tête)",
+    "banniere": "Bannière / photo institutionnelle (haut de page)",
+    "couverture": "Couverture de l'Annuaire (barre latérale)",
+}
+
+
+def save_asset(name: str, file_bytes: bytes, extension: str = "png") -> Path:
+    """Enregistre une ressource visuelle nommée (logo, banniere, couverture)."""
+    if name not in ASSET_NAMES:
+        raise ValueError(f"Ressource inconnue : {name}")
+    _ASSETS.mkdir(parents=True, exist_ok=True)
+    for old in _ASSETS.glob(f"{name}.*"):
         old.unlink()
-    target = assets / f"logo.{extension.lstrip('.').lower()}"
+    target = _ASSETS / f"{name}.{extension.lstrip('.').lower()}"
     target.write_bytes(file_bytes)
     return target
 
 
-def find_logo() -> Optional[Path]:
-    assets = Path(__file__).resolve().parent / "app" / "assets"
+def find_asset(name: str) -> Optional[Path]:
+    """Retrouve une ressource visuelle nommée si elle a été déposée."""
     for ext in ("png", "jpg", "jpeg", "svg", "webp"):
-        p = assets / f"logo.{ext}"
+        p = _ASSETS / f"{name}.{ext}"
         if p.exists():
             return p
     return None
+
+
+# Compatibilité (en-tête) : le logo reste la ressource « logo ».
+def save_logo(file_bytes: bytes, extension: str = "png") -> Path:
+    return save_asset("logo", file_bytes, extension)
+
+
+def find_logo() -> Optional[Path]:
+    return find_asset("logo")
