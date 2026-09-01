@@ -1,9 +1,9 @@
 {
   "n_questions": 18,
   "index_meta": {
-    "n_chunks": 219,
+    "n_chunks": 211,
     "embedding_backend": "tfidf-lsa:384",
-    "embedding_dim": 218,
+    "embedding_dim": 210,
     "n_documents": 4
   },
   "embedding_backend": "tfidf-lsa:384",
@@ -11,27 +11,27 @@
   "config_surrogate_offline": true,
   "retrieval": {
     "lexical": {
-      "ndcg@5": 0.592,
-      "mrr": 0.812,
-      "p@3": 0.4259,
-      "recall@5": 0.5963
+      "ndcg@5": 0.6134,
+      "mrr": 0.8611,
+      "p@3": 0.463,
+      "recall@5": 0.6046
     },
     "vectoriel": {
-      "ndcg@5": 0.6103,
-      "mrr": 0.7889,
-      "p@3": 0.463,
+      "ndcg@5": 0.6238,
+      "mrr": 0.8213,
+      "p@3": 0.4815,
       "recall@5": 0.6343
     },
     "hybride": {
-      "ndcg@5": 0.6023,
-      "mrr": 0.8213,
-      "p@3": 0.4444,
-      "recall@5": 0.6074
+      "ndcg@5": 0.6215,
+      "mrr": 0.8583,
+      "p@3": 0.463,
+      "recall@5": 0.6185
     },
     "hybride+rerank": {
-      "ndcg@5": 0.5708,
-      "mrr": 0.7463,
-      "p@3": 0.463,
+      "ndcg@5": 0.6178,
+      "mrr": 0.8,
+      "p@3": 0.5,
       "recall@5": 0.6231
     }
   },
@@ -39,7 +39,7 @@
     "faithfulness_moyenne": 1.0,
     "exactitude_chiffree_moyenne": 1.0,
     "taux_citation_correcte": 1.0,
-    "rappel_donnees_gold": 0.7941,
+    "rappel_donnees_gold": 0.6961,
     "refus": 0,
     "details": [
       {
@@ -181,8 +181,8 @@
   },
   "hypotheses": {
     "H1": {
-      "gain_ndcg@5": -0.008,
-      "gain_mrr": 0.0093,
+      "gain_ndcg@5": -0.0023,
+      "gain_mrr": -0.0028,
       "seuils": {
         "ndcg": 0.05,
         "mrr": 0.05
@@ -190,8 +190,8 @@
       "validee": false
     },
     "H2": {
-      "gain_ndcg@5": -0.0315,
-      "gain_p@3": 0.0186,
+      "gain_ndcg@5": -0.0037,
+      "gain_p@3": 0.037,
       "seuils": {
         "ndcg": 0.03,
         "precision": 0.03

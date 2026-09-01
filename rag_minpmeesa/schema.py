@@ -56,6 +56,11 @@ class Chunk:
     year: Optional[int] = None
     quarter: Optional[str] = None
     word_count: int = 0
+    # Indice d'informativité du passage dans [0,1] (chap. 3.2) : distingue un
+    # passage porteur d'information (prose rédigée ou tableau chiffré) d'un
+    # passage « creux » (sommaire, formulaire d'annexe, liste d'intitulés vides).
+    # Sert de prior de qualité au classement (retrieval/pipeline.py).
+    informativeness: float = 1.0
 
     def citation(self) -> str:
         """Référence lisible d'une citation, apposée à chaque restitution."""

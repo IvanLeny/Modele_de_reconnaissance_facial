@@ -18,10 +18,56 @@ from typing import List
 
 from ..config import IngestionConfig
 from ..schema import Chunk, DocumentMeta
+from ..index.text_utils import tokenize_fr, FUNCTION_WORDS_FR
 from .extract import PageElement
 
 _DIGIT_RE = re.compile(r"\d")
 _WORD_RE = re.compile(r"\S+")
+_DECIMAL_RE = re.compile(r"\d[.,]\d")   # 69,80  5,7  3.2 — pourcentages et décimales
+_INT3_RE = re.compile(r"^\d{3,}$")      # entier à 3 chiffres ou plus
+
+
+def _clamp01(x: float) -> float:
+    return 0.0 if x < 0 else (1.0 if x > 1 else x)
+
+
+def _is_meaningful_number(tok: str) -> bool:
+    """Une vraie statistique : décimale/pourcentage, ou grand entier — mais pas
+    un simple ordinal (1, 2, 5) ni un millésime isolé (2023)."""
+    if _DECIMAL_RE.search(tok):
+        return True
+    if _INT3_RE.match(tok):
+        if len(tok) == 4 and 1900 <= int(tok) <= 2099:   # millésime isolé
+            return False
+        return True
+    return False
+
+
+def compute_informativeness(text: str) -> float:
+    """
+    Indice d'informativité dans [0,1] (chap. 3.2).
+
+    Un passage est jugé informatif s'il est SOIT une prose rédigée (forte densité
+    de mots-outils), SOIT un tableau porteur de chiffres RÉELS (nombres à trois
+    chiffres ou plus). Un passage « creux » — sommaire, formulaire d'annexe, liste
+    d'intitulés aux champs vides — présente une densité de mots-outils moyenne
+    (quelques « de », « et ») mais SANS verbe ni vraie statistique : il tombe dans
+    la zone morte des deux critères et reçoit un indice bas, ce qui le fait reculer
+    au classement sans jamais l'exclure.
+
+    Calibrage (mesuré sur le corpus) : prose rédigée -> mots-outils >= 0,42 ;
+    tableau de données -> grands nombres >= 0,20 ; formulaires d'annexe -> les
+    deux nettement en dessous.
+    """
+    tokens = tokenize_fr(text, keep_stopwords=True)
+    if not tokens:
+        return 0.15
+    n = len(tokens)
+    func_ratio = sum(1 for t in tokens if t in FUNCTION_WORDS_FR) / n
+    num_ratio = sum(1 for t in tokens if _is_meaningful_number(t)) / n
+    prose = _clamp01((func_ratio - 0.20) / (0.42 - 0.20))
+    data = _clamp01((num_ratio - 0.05) / (0.18 - 0.05))
+    return max(0.15, prose, data)
 
 
 def _count_numbers(text: str) -> bool:
@@ -39,6 +85,32 @@ def _is_toc(text: str) -> bool:
         # Beaucoup de légendes et peu de phrases : c'est une table des matières.
         return True
     return False
+
+
+# Intitulés de champs typiques des formulaires d'annexe (canevas de collecte).
+_FORM_LABEL_RE = re.compile(
+    r"\b(nombre d|effectif|montant total|taux de|valeur des|total\b|autres à préciser)",
+    re.IGNORECASE)
+
+
+def _is_empty_form(text: str) -> bool:
+    """
+    Détecte un formulaire d'annexe « vide » : un canevas de collecte fait
+    d'intitulés de champs (« Nombre de… », « Total », « Effectif ») mais sans
+    aucune donnée chiffrée renseignée. Ces pages, purement structurelles, n'ont
+    aucune valeur informative et polluent la recherche par simple correspondance
+    de mots-clés ; elles sont donc écartées de l'index.
+
+    Critère (calibré sur le corpus) : au moins 6 intitulés de champs ET au plus
+    2 statistiques réelles — ce qui distingue nettement un canevas vide d'un vrai
+    tableau de données (des dizaines de nombres).
+    """
+    labels = len(_FORM_LABEL_RE.findall(text))
+    if labels < 6:
+        return False
+    meaningful = sum(1 for t in tokenize_fr(text, keep_stopwords=True)
+                     if _is_meaningful_number(t))
+    return meaningful <= 2
 
 
 def _split_paragraphs(text: str) -> List[str]:
@@ -67,7 +139,7 @@ def chunk_document(
             return
         text = " ".join(buffer_words).strip()
         wc = len(buffer_words)
-        if wc >= cfg.min_chunk_words and not _is_toc(text):
+        if wc >= cfg.min_chunk_words and not _is_toc(text) and not _is_empty_form(text):
             page_start = min(buffer_pages)
             page_end = max(buffer_pages)
             chunk_id = f"{meta.doc_id}::c{counter:04d}"
@@ -87,6 +159,7 @@ def chunk_document(
                 year=meta.year,
                 quarter=meta.quarter,
                 word_count=wc,
+                informativeness=compute_informativeness(text),
             ))
             counter += 1
         buffer_words = []

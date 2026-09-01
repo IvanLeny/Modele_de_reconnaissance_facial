@@ -29,6 +29,25 @@ il ouvre directement l'application. Pour l'arrêter : `Ctrl+C` dans la fenêtre.
 
 ---
 
+## ✨ Trois usages dans une seule interface
+
+L'application web (Streamlit) est organisée en trois onglets :
+
+1. **🔎 Interroger** — poser une question en langage naturel ; réponse **sourcée**,
+   toute donnée chiffrée reprise littéralement de sa source (deux modes :
+   production / consultation).
+2. **📋 Collecte pour l'Annuaire** — réunir, **par rubrique de l'Annuaire**
+   (stock des PME, emploi, trésorerie, inflation, appui aux PME…), les constats et
+   chiffres sourcés à **transcrire dans l'Annuaire statistique**, exportables en
+   CSV ou Markdown. C'est l'appui direct à la production de l'Annuaire.
+3. **⚙️ Mettre à jour la documentation** — **ajouter, remplacer ou retirer** des
+   documents du corpus (téléversement de PDF + métadonnées), déposer le **logo**
+   de la structure, puis **reconstruire l'index** — le tout sans toucher au code.
+
+Charte visuelle aux **couleurs du MINPMEESA** (vert / rouge / jaune) ; le logo
+s'affiche dès qu'il est déposé (`rag_minpmeesa/app/assets/logo.png` ou via
+l'onglet de mise à jour).
+
 ## 1. Ce que fait le système
 
 - **Ingère** l'Annuaire statistique et les Notes de conjoncture (PDF) : extraction

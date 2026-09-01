@@ -107,7 +107,9 @@ class HybridRetriever:
         else:
             fused = reciprocal_rank_fusion(ranked_lists, k=cfg.rrf_k)
 
-        # Ordre après fusion.
+        # La fusion de premier étage reste « pure » (aucun prior de qualité), afin
+        # que la comparaison hybride vs configurations simples (H1) soit équitable.
+        # Le départage des passages « creux » est confié à l'étape de reranking.
         fused_order = sorted(fused.items(), key=lambda kv: kv[1]["rrf"], reverse=True)
         candidates = fused_order[: cfg.top_k_fused]
 
@@ -144,7 +146,12 @@ class HybridRetriever:
             w = cfg.rerank_blend
             for r, s, rn, fn in zip(results, rr_scores, rr_norm, fu_norm):
                 r.score_rerank = float(s)
-                r.score = w * rn + (1 - w) * fn      # score de classement final
+                blended = w * rn + (1 - w) * fn
+                # Prior de qualité (doux, borné à [0,55 ; 1,0]) : un passage « creux »
+                # — sommaire, formulaire d'annexe — est rétrogradé au profit d'une
+                # prose ou d'un tableau porteurs d'information, sans être exclu.
+                quality = 0.55 + 0.45 * r.chunk.informativeness
+                r.score = blended * quality          # score de classement final
                 r.provenance = "rerank"
             results.sort(key=lambda r: r.score, reverse=True)
 

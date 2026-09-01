@@ -22,6 +22,7 @@ justifier chaque élément restitué.
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
@@ -167,10 +168,20 @@ class Answerer:
                 digit_tokens = [t for t in raw_toks if any(ch.isdigit() for ch in t)]
                 if len(alpha_words) < 4:
                     continue
+                # Rejet des « listes d'intitulés » (formulaires d'annexe, sommaires) :
+                # une vraie phrase porte des mots-outils OU une statistique réelle.
+                from ..index.text_utils import FUNCTION_WORDS_FR
+                func_ratio = sum(1 for t in raw_toks if t in FUNCTION_WORDS_FR) / len(raw_toks)
+                has_real_number = any(len(re.sub(r"\D", "", t)) >= 3 for t in digit_tokens)
+                if func_ratio < 0.18 and not has_real_number:
+                    continue
                 digit_ratio = len(digit_tokens) / max(1, len(raw_toks))
                 prose_bonus = 1.0 if digit_ratio < 0.35 else 0.5
                 length_penalty = 1.0 if 5 <= len(raw_toks) <= 70 else 0.6
-                score = overlap * length_penalty * prose_bonus - 0.001 * bi
+                # Dans un corpus statistique, une phrase porteuse d'une donnée
+                # chiffrée réelle répond souvent directement à la question.
+                number_bonus = 0.25 if has_real_number else 0.0
+                score = overlap * length_penalty * prose_bonus + number_bonus - 0.001 * bi
                 candidates.append((score, bi, sent.strip()))
         candidates.sort(key=lambda x: x[0], reverse=True)
 

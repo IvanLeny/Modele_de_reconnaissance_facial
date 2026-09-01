@@ -25,6 +25,17 @@ STOPWORDS_FR = {
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+(?:[.,]\d+)?", re.IGNORECASE)
 
+# Mots-outils (articles, prépositions, conjonctions, auxiliaires) : leur densité
+# distingue une phrase rédigée d'une simple liste d'intitulés. Sert au calcul
+# de l'informativité d'un passage (ingestion/chunk.py).
+FUNCTION_WORDS_FR = STOPWORDS_FR | {
+    "cette", "notamment", "ainsi", "donc", "car", "mais", "alors", "entre",
+    "chez", "selon", "afin", "lors", "depuis", "vers", "etait", "ete", "avoir",
+    "cependant", "toutefois", "aussi", "meme", "tres", "plus", "moins", "leurs",
+    "ceux", "celle", "celles", "dont", "quel", "quelle", "comme", "pendant",
+    "apres", "avant", "encore", "deja", "soit", "etre", "fait", "font",
+}
+
 
 def normalize(text: str) -> str:
     """Minuscule + suppression des accents (comparaison robuste)."""
