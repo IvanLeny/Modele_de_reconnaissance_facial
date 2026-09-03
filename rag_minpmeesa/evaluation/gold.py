@@ -20,6 +20,7 @@ class GoldQuestion:
     gold_numbers: List[str] = field(default_factory=list)
     reference: str = ""
     internal_only: bool = False
+    category: str = ""                         # CU1-CU5 ou "hors périmètre" (provisoire)
 
     def relevant_pages(self, doc_id: str) -> set:
         pages = set()
@@ -47,6 +48,7 @@ def load_gold(path=None) -> List[GoldQuestion]:
             gold_numbers=q.get("gold_numbers", []),
             reference=q.get("reference", ""),
             internal_only=q.get("internal_only", False),
+            category=q.get("category", ""),
         ))
     return out
 
