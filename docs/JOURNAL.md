@@ -1,0 +1,88 @@
+# Journal de bord du prototype (démarche §Règles de conduite)
+
+Ce journal trace, étape par étape, les décisions de conception, les
+paramètres retenus et les constats mesurés. Il est mis à jour à chaque
+étape franchie. Toutes les valeurs proviennent d'exécutions réelles ;
+aucune n'est inventée. Les artefacts d'évaluation (`outputs/runs/…`) sont
+régénérables et volontairement non versionnés.
+
+Régime d'exécution courant : **hors-ligne** — substitut TF-IDF + réduction
+LSA (SVD tronquée). L'index résolu est `tfidf-lsa:384` (210 composantes
+effectives, cf. constat §7.2). La configuration de référence
+(transformeur multilingue + cross-encoder + LLM local) se branche par
+`config.yaml` sur la machine de l'utilisateur, sans changement de code.
+
+---
+
+## Étape 1 — Assainissement du socle
+- Externalisation intégrale des paramètres dans `config.yaml` ; plus aucune
+  valeur expérimentale codée en dur (vérifié : surcharge `rrf_k` 60→77→60).
+- Graines fixées en un point unique (`set_global_seed`) : `random`, NumPy,
+  `PYTHONHASHSEED`.
+- Dossiers de sortie horodatés (`outputs/runs`, `outputs/figures`).
+- Tests d'ingestion ajoutés (segmentation, tableau d'un seul tenant,
+  exclusion des formulaires vides, informativité, lecture de `config.yaml`).
+
+## Étape 4 — Lexique métier + expansion de requête
+- Dictionnaire `data/lexique/synonymes.yaml` (~60 familles métier).
+- `QueryExpander` : déclenche une famille si un membre apparaît dans la
+  requête normalisée, ajoute les autres membres (plafond configurable).
+- Expansion **désactivable** (`use_expansion`) pour l'ablation §7.4.
+- Canal lexical uniquement ; les canaux vectoriel et de restitution sont
+  intacts.
+
+## Étape 6 — Harnais d'évaluation C0–C5
+- `run_evaluation()` : configurations C1 (lexical), C2 (vectoriel),
+  C3 (hybride), C4 (hybride+rerank), C5 (C4+restitution), C0 (LLM, si
+  disponible). Latence de récupération et de restitution chronométrées
+  séparément.
+- Sorties horodatées : `metrics_global.csv`, `runs_top10.csv`,
+  `per_question.csv`, `restitution.csv`, `run_metadata.json` (versions de
+  bibliothèques, pic RSS, régime, graine).
+- Bornes des métriques respectées : dénominateur = nombre de passages
+  pertinents **présents dans l'index** (la pertinence est annotée au niveau
+  page, la récupération se fait au niveau passage) → P/R/nDCG ≤ 1.
+
+## Étape 7 — Études d'ablation
+Commande : `python -m rag_minpmeesa.app.cli ablations`. Cinq études, sorties
+CSV dans `outputs/runs/ablations_<horodatage>/`.
+
+- **7.1 — Constante de fusion k ∈ {1,5,10,20,60,100}.** Sur C4, nDCG@5
+  culmine à k=10 (0,642) puis se tasse et se stabilise à k=60 (0,633).
+  → Constat : sur des listes courtes, la valeur conventionnelle 60 écrase
+  les écarts de rang ; k=10 est légèrement supérieur sur ce corpus. Le choix
+  de 60 est conservé pour la comparabilité, mais documenté comme non optimal
+  ici.
+- **7.2 — Dimension de la réduction sémantique ∈ {64,128,256,384}.** Les
+  dimensions 256 et 384 donnent toutes deux **210 composantes effectives**
+  (rang de la matrice TF-IDF) avec des métriques identiques.
+  → Constat : au-delà de 210, « conserver 210 composantes revient à une
+  rotation de l'espace TF-IDF et non à une réduction ». Les dimensions plus
+  basses (64, 128) réduisent effectivement et changent les scores.
+- **7.3 — Taille de segment / recouvrement ∈ {(120,30),(180,40),(260,60)}.**
+  Segments courts (120) → meilleure P@3 (0,537) mais moindre rappel ;
+  segments longs (260) → meilleur R@5 (0,722) et nDCG@5 (0,682). Le réglage
+  courant (180,40) est un compromis.
+- **7.4 — Expansion activée / désactivée.** L'expansion **dégrade** les
+  métriques sur le canal lexical (nDCG@5 0,613→0,374) et l'hybride sur ce
+  jeu de test dérivé du corpus (lexicalement biaisé, comme relevé par
+  l'encadreur). → Constat : l'expansion est à réévaluer sur le jeu de test
+  terrain (§8) rédigé indépendamment du corpus ; désactivable par défaut.
+- **7.5 — Réordonnancement par catégorie (CU1–CU5).** Le reranking aide
+  partout ou reste neutre ; gains nets sur CU4 (nDCG@3 0,352→0,617) et CU5
+  (0,412→0,592), neutre sur CU2.
+
+---
+
+## À faire (étapes restantes)
+- **Étape 5** — Garde-fous de restitution : test du cloisonnement sur le
+  corpus entier, calibration de l'abstention par courbe (≥30 requêtes,
+  moitié hors périmètre), ancrage phrase par phrase.
+- **Étape 9** — Statistiques et figures : Wilcoxon apparié + win/lose/tie,
+  Kendall τ, ventilation par catégorie, note de granularité 1/(3n), figures
+  300 dpi (courbe de calibration de l'abstention, balayage de k).
+- **Étape 3/10** — Protocoles Encoder/Reranker + bascule automatique,
+  `docs/INSTALLATION.md`, `docs/DEMONSTRATION.md` (scénario 5 requêtes).
+- **Côté terrain (machine de l'utilisateur)** — corpus ≥ 1000 passages + RAP,
+  transfert des caches de modèles + Ollama, jeu de test ≥ 50 questions
+  doublement annotées (kappa), C0/C5 avec LLM, mesure du gain opérationnel.

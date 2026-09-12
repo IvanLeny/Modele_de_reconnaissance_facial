@@ -71,6 +71,12 @@ def cmd_harness(args):
     run_evaluation(verbose=True)
 
 
+def cmd_ablations(args):
+    """Études d'ablation (k, dimension SVD, segmentation, expansion, reranking) (démarche §7)."""
+    from ..evaluation.ablations import run_ablations
+    run_ablations(verbose=True)
+
+
 def cmd_info(args):
     settings = get_settings()
     eng = RAGEngine()
@@ -99,6 +105,7 @@ def main(argv=None):
 
     sub.add_parser("eval", help="évaluation complète (rapport hypothèses)").set_defaults(func=cmd_eval)
     sub.add_parser("harness", help="harnais C0-C5 + 4 CSV horodatés (démarche §6)").set_defaults(func=cmd_harness)
+    sub.add_parser("ablations", help="études d'ablation : k, dim SVD, segments, expansion, rerank (démarche §7)").set_defaults(func=cmd_ablations)
     sub.add_parser("info", help="état de l'index").set_defaults(func=cmd_info)
 
     args = p.parse_args(argv)
