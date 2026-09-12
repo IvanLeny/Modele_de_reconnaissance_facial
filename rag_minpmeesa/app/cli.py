@@ -65,6 +65,12 @@ def cmd_eval(args):
     run_full_evaluation(eng, verbose=True)
 
 
+def cmd_harness(args):
+    """Harnais complet C0-C5 : 4 CSV + run_metadata dans outputs/runs/ (démarche §6)."""
+    from ..evaluation.runner import run_evaluation
+    run_evaluation(verbose=True)
+
+
 def cmd_info(args):
     settings = get_settings()
     eng = RAGEngine()
@@ -91,7 +97,8 @@ def main(argv=None):
                    default=Mode.PRODUCTION.value)
     q.set_defaults(func=cmd_query)
 
-    sub.add_parser("eval", help="évaluation complète").set_defaults(func=cmd_eval)
+    sub.add_parser("eval", help="évaluation complète (rapport hypothèses)").set_defaults(func=cmd_eval)
+    sub.add_parser("harness", help="harnais C0-C5 + 4 CSV horodatés (démarche §6)").set_defaults(func=cmd_harness)
     sub.add_parser("info", help="état de l'index").set_defaults(func=cmd_info)
 
     args = p.parse_args(argv)

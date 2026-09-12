@@ -56,9 +56,13 @@ class Paths:
     index_dir: Path = _ROOT / "data" / "index"
     gold_dir: Path = _ROOT / "data" / "gold"
     results_dir: Path = _ROOT / "data" / "results"
+    # Sorties d'évaluation horodatées et figures (démarche §6, §9)
+    runs_dir: Path = _ROOT / "outputs" / "runs"
+    figures_dir: Path = _ROOT / "outputs" / "figures"
 
     def ensure(self) -> "Paths":
-        for p in (self.index_dir, self.gold_dir, self.results_dir):
+        for p in (self.index_dir, self.gold_dir, self.results_dir,
+                  self.runs_dir, self.figures_dir):
             p.mkdir(parents=True, exist_ok=True)
         return self
 
