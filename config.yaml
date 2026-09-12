@@ -1,0 +1,88 @@
+# =====================================================================
+#  Configuration centrale du système RAG hybride MINPMEESA
+#  Aucune valeur expérimentale n'est codée en dur dans le code :
+#  tout paramètre est défini ici (démarche §1, reproductibilité).
+#  Modifier ce fichier suffit à rejouer une variante d'expérience.
+# =====================================================================
+
+seed: 42                       # graine unique, fixe toute l'aléa (reproductibilité)
+
+# ---------------------------------------------------------------------
+#  Ingestion et segmentation (src/ingestion)
+# ---------------------------------------------------------------------
+ingestion:
+  chunk_size_words: 180        # taille cible d'un passage (mots)
+  chunk_overlap_words: 40      # recouvrement entre passages successifs
+  min_chunk_words: 12          # rejet des fragments trop courts
+  table_max_words: 320         # un tableau tient d'un seul tenant sous ce plafond
+
+# ---------------------------------------------------------------------
+#  Encodeur vectoriel (interface Encoder — src/retrieval/semantic.py)
+# ---------------------------------------------------------------------
+embedding:
+  transformer_model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+  backend: "auto"             # auto | transformer | tfidf  (bascule automatique)
+  tfidf_dims: 384             # dimension du substitut hors-ligne (SVD tronquée)
+  normalize: true             # vecteurs L2-normalisés (cosinus = produit scalaire)
+
+# ---------------------------------------------------------------------
+#  Récupération hybride (src/retrieval)
+# ---------------------------------------------------------------------
+retrieval:
+  top_k_lexical: 30           # candidats du canal lexical (BM25)
+  top_k_vector: 30            # candidats du canal sémantique
+  overfetch_factor: 4         # sur-échantillonnage avant filtrage par métadonnées
+  rrf_k: 60                   # constante de la fusion par rangs réciproques
+  top_k_fused: 12             # candidats après fusion, transmis au reranking
+  top_k_final: 5              # passages finalement retenus
+  use_reranker: true
+  reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  rerank_blend: 0.5           # poids du reranking dans le score final (0..1)
+  # Pondération douce par l'indice d'informativité (rétrograde les passages « creux »)
+  informativeness_floor: 0.55 # poids minimal (passage le moins informatif)
+  informativeness_span: 0.45  # amplitude ajoutée (poids max = floor + span)
+
+# ---------------------------------------------------------------------
+#  Expansion de requête par dictionnaire métier (src/retrieval/expansion.py)
+#  Appliquée à la SEULE requête lexicale, jamais au sémantique ni aux passages.
+# ---------------------------------------------------------------------
+expansion:
+  enabled: true
+  lexique_file: "data/lexique/synonymes.yaml"
+  max_expansions_per_term: 4  # borne le nombre de synonymes ajoutés par terme
+
+# ---------------------------------------------------------------------
+#  Restitution contrôlée et garde-fous (src/restitution)
+# ---------------------------------------------------------------------
+restitution:
+  synthesis: "extractive"     # extractive | llm
+  enforce_literal_numbers: true
+  max_context_chars: 6000
+  max_summary_sentences: 5
+  support_overlap_threshold: 0.5   # seuil de fidélité d'un énoncé
+  # Modèle de langage local (mode llm) — point d'accès compatible OpenAI (Ollama)
+  llm_base_url: ""            # ex. http://localhost:11434/v1  (vide = extractif)
+  llm_model: ""              # ex. llama3.1:8b
+
+# ---------------------------------------------------------------------
+#  Abstention (src/restitution/abstention.py)
+#  Deux déclencheurs : aucun candidat après filtrage ; ou meilleur score < seuil.
+# ---------------------------------------------------------------------
+abstention:
+  enabled: true
+  min_score: 0.015           # seuil sur le meilleur score de fusion (à calibrer, étape 5)
+
+# ---------------------------------------------------------------------
+#  Seuils de validation des hypothèses fixés a priori (Tableau A.3)
+# ---------------------------------------------------------------------
+thresholds:
+  h1_min_ndcg_gain: 0.05
+  h1_min_mrr_gain: 0.05
+  h2_min_ndcg_gain: 0.03
+  h2_min_precision_gain: 0.03
+  h3_min_unsupported_reduction: 0.20
+  h3_min_faithfulness: 0.80
+  h3_min_numeric_accuracy: 0.95
+  h4_min_time_reduction: 0.50
+  h5_min_time_reduction: 0.50
+  h5_min_answer_accuracy: 0.85

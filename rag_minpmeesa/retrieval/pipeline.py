@@ -84,7 +84,8 @@ class HybridRetriever:
             return []
 
         # Sur-échantillonnage puis restriction aux passages autorisés.
-        over = max(60, cfg.top_k_lexical * 4, cfg.top_k_vector * 4)
+        f = cfg.overfetch_factor
+        over = max(cfg.rrf_k, cfg.top_k_lexical * f, cfg.top_k_vector * f)
         over = min(over, len(chunks))
 
         ranked_lists = {}
@@ -150,7 +151,7 @@ class HybridRetriever:
                 # Prior de qualité (doux, borné à [0,55 ; 1,0]) : un passage « creux »
                 # — sommaire, formulaire d'annexe — est rétrogradé au profit d'une
                 # prose ou d'un tableau porteurs d'information, sans être exclu.
-                quality = 0.55 + 0.45 * r.chunk.informativeness
+                quality = cfg.informativeness_floor + cfg.informativeness_span * r.chunk.informativeness
                 r.score = blended * quality          # score de classement final
                 r.provenance = "rerank"
             results.sort(key=lambda r: r.score, reverse=True)

@@ -98,6 +98,7 @@ class EmbeddingConfig:
 class RetrievalConfig:
     top_k_lexical: int = 30            # candidats BM25
     top_k_vector: int = 30            # candidats vectoriels
+    overfetch_factor: int = 4         # sur-échantillonnage avant filtrage métadonnées
     rrf_k: int = 60                   # constante de la Reciprocal Rank Fusion
     top_k_fused: int = 12            # candidats après fusion, transmis au reranking
     top_k_final: int = 5             # passages retenus pour la restitution
@@ -108,6 +109,24 @@ class RetrievalConfig:
     # récupération). Un reranking pur (poids = 1) peut dégrader le rappel ;
     # le mélange stabilise le classement (learning-to-rank à deux étages).
     rerank_blend: float = 0.5
+    # Pondération douce par l'indice d'informativité : poids = floor + span*info.
+    informativeness_floor: float = 0.55
+    informativeness_span: float = 0.45
+
+
+@dataclass
+class ExpansionConfig:
+    """Expansion de requête par dictionnaire métier (démarche §4)."""
+    enabled: bool = True
+    lexique_file: str = "data/lexique/synonymes.yaml"
+    max_expansions_per_term: int = 4
+
+
+@dataclass
+class AbstentionConfig:
+    """Abstention : le système sait ne pas répondre (démarche §5)."""
+    enabled: bool = True
+    min_score: float = 0.015          # seuil sur le meilleur score de fusion
 
 
 # --------------------------------------------------------------------------- #
@@ -130,6 +149,9 @@ class GenerationConfig:
     # Un énoncé de la synthèse est jugé « soutenu » si son recouvrement lexical
     # avec le contexte dépasse ce seuil (garde-fou de fidélité, chap. 3.6).
     support_overlap_threshold: float = 0.5
+    # Modèle de langage local (mode "llm"), point d'accès compatible OpenAI (Ollama).
+    llm_base_url: str = ""
+    llm_model: str = ""
 
 
 # --------------------------------------------------------------------------- #
@@ -162,7 +184,9 @@ class Settings:
     ingestion: IngestionConfig = field(default_factory=IngestionConfig)
     embedding: EmbeddingConfig = field(default_factory=EmbeddingConfig)
     retrieval: RetrievalConfig = field(default_factory=RetrievalConfig)
+    expansion: ExpansionConfig = field(default_factory=ExpansionConfig)
     generation: GenerationConfig = field(default_factory=GenerationConfig)
+    abstention: AbstentionConfig = field(default_factory=AbstentionConfig)
     thresholds: HypothesisThresholds = field(default_factory=HypothesisThresholds)
     seed: int = 42
 
@@ -178,16 +202,61 @@ class Settings:
 
 _SETTINGS: Optional[Settings] = None
 
+# Correspondance clé YAML de premier niveau -> attribut de Settings.
+_YAML_SECTIONS = {
+    "ingestion": "ingestion",
+    "embedding": "embedding",
+    "retrieval": "retrieval",
+    "expansion": "expansion",
+    "restitution": "generation",   # la section « restitution » du YAML alimente GenerationConfig
+    "abstention": "abstention",
+    "thresholds": "thresholds",
+}
+
+
+def set_global_seed(seed: int) -> None:
+    """Fixe toutes les sources d'aléa pour la reproductibilité (démarche §1)."""
+    import random
+    random.seed(seed)
+    try:
+        import numpy as np
+        np.random.seed(seed)
+    except Exception:
+        pass
+    os.environ["PYTHONHASHSEED"] = str(seed)
+
+
+def _apply_yaml(settings: Settings, path: Path) -> None:
+    """Applique les surcharges de config.yaml, section par section, sans écraser
+    les valeurs absentes du fichier. Toute clé inconnue est ignorée silencieusement."""
+    if not path.exists():
+        return
+    import yaml
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if "seed" in data:
+        settings.seed = int(data["seed"])
+    for yaml_key, attr in _YAML_SECTIONS.items():
+        section = data.get(yaml_key)
+        if not isinstance(section, dict):
+            continue
+        target = getattr(settings, attr)
+        for k, v in section.items():
+            if hasattr(target, k):
+                setattr(target, k, v)
+
 
 def get_settings() -> Settings:
-    """Renvoie l'instance de configuration (singleton) et crée les dossiers."""
+    """Renvoie l'instance de configuration (singleton), applique config.yaml,
+    crée les dossiers et fixe les graines. Fonctionne sans réseau."""
     global _SETTINGS
     if _SETTINGS is None:
         _SETTINGS = Settings()
+        _apply_yaml(_SETTINGS, _SETTINGS.paths.root / "config.yaml")
         _SETTINGS.paths.ensure()
-        # Autorise un backend d'embedding forcé par variable d'environnement,
+        # Un backend d'embedding peut être forcé par variable d'environnement,
         # utile pour reproduire une expérience hors-ligne : RAG_EMBEDDING_BACKEND=tfidf
         env_backend = os.environ.get("RAG_EMBEDDING_BACKEND")
         if env_backend in {"auto", "transformer", "tfidf"}:
             _SETTINGS.embedding.backend = env_backend
+        set_global_seed(_SETTINGS.seed)
     return _SETTINGS
