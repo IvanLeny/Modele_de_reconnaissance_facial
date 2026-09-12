@@ -83,6 +83,18 @@ def cmd_calibration(args):
     run_calibration(verbose=True)
 
 
+def cmd_stats(args):
+    """Statistiques inférentielles : Wilcoxon apparié, win/lose/tie, Kendall (démarche §9)."""
+    from ..evaluation.stats import run_stats
+    run_stats(verbose=True)
+
+
+def cmd_figures(args):
+    """Figures d'évaluation 300 dpi (balayage k, calibration abstention) (démarche §9)."""
+    from ..evaluation.figures import run_figures
+    run_figures(verbose=True)
+
+
 def cmd_info(args):
     settings = get_settings()
     eng = RAGEngine()
@@ -113,6 +125,8 @@ def main(argv=None):
     sub.add_parser("harness", help="harnais C0-C5 + 4 CSV horodatés (démarche §6)").set_defaults(func=cmd_harness)
     sub.add_parser("ablations", help="études d'ablation : k, dim SVD, segments, expansion, rerank (démarche §7)").set_defaults(func=cmd_ablations)
     sub.add_parser("calibration", help="calibration du seuil d'abstention (démarche §5)").set_defaults(func=cmd_calibration)
+    sub.add_parser("stats", help="statistiques inférentielles : Wilcoxon, win/lose/tie, Kendall (démarche §9)").set_defaults(func=cmd_stats)
+    sub.add_parser("figures", help="figures d'évaluation 300 dpi (démarche §9)").set_defaults(func=cmd_figures)
     sub.add_parser("info", help="état de l'index").set_defaults(func=cmd_info)
 
     args = p.parse_args(argv)

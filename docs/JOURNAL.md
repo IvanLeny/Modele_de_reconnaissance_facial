@@ -98,12 +98,33 @@ Quatre propriétés non négociables (démarche §0) vérifiées ou renforcées.
   son passage source (`SourcedSentence`) et classé soutenu / non soutenu par le
   rapport de fidélité (`guardrails.py`).
 
+## Étape 9 — Statistiques et figures
+Commandes : `python -m rag_minpmeesa.app.cli stats` et `… figures`.
+
+- **Tests appariés (`evaluation/stats.py`).** Wilcoxon signé sur les nDCG@5
+  par question + décompte gains/pertes/égalités + Kendall τ, pour toutes les
+  paires C1–C4. Constats (régime hors-ligne, n=18) :
+  - C1 (lexical) significativement le plus faible (p ≈ 0,0015 contre chaque
+    autre configuration) ;
+  - **C4 > C3** : le réordonnancement apporte un gain significatif
+    (Δ nDCG@5 = +0,056 ; p = 0,018 ; 7 gains / 0 perte / 11 égalités ;
+    τ = 0,81) — sens de l'hypothèse H2 ;
+  - C2 (vectoriel) vs C3 (hybride) : différence **non significative**
+    (p = 0,42 ; Δ = 0,047), et C2 vs C4 sous le seuil de granularité — à
+    rapporter honnêtement : dans le régime hors-ligne TF-IDF, l'hybridation
+    n'améliore pas nettement le vectoriel seul.
+- **Note de granularité.** Avec n=18 et une pertinence annotée à la page
+  (≈3 passages pertinents/question), la résolution d'une moyenne est
+  ≈ 1/(3n) ≈ 0,0185 ; les écarts inférieurs (ex. C2 vs C4) ne sont pas
+  interprétés.
+- **Ventilation par catégorie** CU1–CU5 (`stats_par_categorie.csv`).
+- **Figures 300 dpi** (`evaluation/figures.py`, `outputs/figures/`) :
+  balayage de k (C3/C4) et calibration de l'abstention (distributions des
+  confiances + sensibilité/spécificité selon le seuil).
+
 ---
 
 ## À faire (étapes restantes)
-- **Étape 9** — Statistiques et figures : Wilcoxon apparié + win/lose/tie,
-  Kendall τ, ventilation par catégorie, note de granularité 1/(3n), figures
-  300 dpi (courbe de calibration de l'abstention, balayage de k).
 - **Étape 3/10** — Protocoles Encoder/Reranker + bascule automatique,
   `docs/INSTALLATION.md`, `docs/DEMONSTRATION.md` (scénario 5 requêtes).
 - **Côté terrain (machine de l'utilisateur)** — corpus ≥ 1000 passages + RAP,
