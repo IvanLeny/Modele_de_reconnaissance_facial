@@ -66,7 +66,7 @@ def test_parametres_lus_depuis_config_yaml():
     s = get_settings()
     assert s.retrieval.rrf_k == 60
     assert s.expansion.enabled in (True, False)
-    assert 0.0 <= s.abstention.min_score <= 1.0
+    assert s.abstention.min_lexical_score >= 0.0
 
 
 def test_expansion_lexicale_declenche_les_synonymes():

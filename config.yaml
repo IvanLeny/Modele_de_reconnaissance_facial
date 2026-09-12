@@ -70,7 +70,12 @@ restitution:
 # ---------------------------------------------------------------------
 abstention:
   enabled: true
-  min_score: 0.015           # seuil sur le meilleur score de fusion (à calibrer, étape 5)
+  # Signal de confiance = meilleur score lexical (BM25) parmi les passages
+  # récupérés. BM25 récompense le recouvrement avec le vocabulaire métier du
+  # corpus (PME, trésorerie, CFCE, CEMAC…) ; il s'effondre sur les requêtes
+  # hors périmètre. Seuil calibré à l'étape 5 (evaluation/calibration.py) :
+  # séparation nette entre en-périmètre (≥ 15) et hors-périmètre (≤ 10).
+  min_lexical_score: 12.0
 
 # ---------------------------------------------------------------------
 #  Seuils de validation des hypothèses fixés a priori (Tableau A.3)

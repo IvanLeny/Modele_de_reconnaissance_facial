@@ -72,12 +72,35 @@ CSV dans `outputs/runs/ablations_<horodatage>/`.
   partout ou reste neutre ; gains nets sur CU4 (nDCG@3 0,352→0,617) et CU5
   (0,412→0,592), neutre sur CU2.
 
+## Étape 5 — Garde-fous de restitution
+Quatre propriétés non négociables (démarche §0) vérifiées ou renforcées.
+
+- **Citation littérale des nombres.** Le garde-fou numérique
+  (`generation/numeric.py`) reprend chaque donnée chiffrée verbatim d'une
+  source ; toute valeur non retrouvée est retirée (test
+  `test_answer_numeric_guardrail` : exactitude = 1).
+- **Cloisonnement au niveau requête, sur tout le corpus.** Nouveau test
+  `test_cloisonnement_couvre_tout_le_corpus` : sur l'intégralité de l'index,
+  le filtre du mode consultation n'autorise **aucun** passage interne (garantie
+  indépendante de la requête, appliquée avant tout scoring — jamais un filtre
+  d'affichage).
+- **Abstention calibrée par courbe** (`evaluation/calibration.py`, commande
+  CLI `calibration`). 36 requêtes (18 en périmètre issues du jeu de test,
+  18 hors périmètre rédigées indépendamment du corpus,
+  `data/gold/hors_perimetre.json`). Constat décisif : le score de fusion
+  **normalisé** ne discrimine pas (toujours ≈ 1 en tête, J de Youden ≈ 0,17),
+  mais le **score lexical BM25 brut** sépare parfaitement les deux populations
+  (en périmètre ≥ 15,05 ; hors périmètre ≤ 9,79 ; J = 1,0, zéro fuite, zéro
+  réponse perdue). Le signal d'abstention retenu est donc le meilleur BM25 ;
+  seuil calibré à 12,0 (centré dans l'intervalle de séparation ; recommandé
+  9,91). Tests `test_abstention_hors_perimetre` / `..._repond_en_perimetre`.
+- **Ancrage phrase par phrase.** Chaque énoncé de la synthèse est rattaché à
+  son passage source (`SourcedSentence`) et classé soutenu / non soutenu par le
+  rapport de fidélité (`guardrails.py`).
+
 ---
 
 ## À faire (étapes restantes)
-- **Étape 5** — Garde-fous de restitution : test du cloisonnement sur le
-  corpus entier, calibration de l'abstention par courbe (≥30 requêtes,
-  moitié hors périmètre), ancrage phrase par phrase.
 - **Étape 9** — Statistiques et figures : Wilcoxon apparié + win/lose/tie,
   Kendall τ, ventilation par catégorie, note de granularité 1/(3n), figures
   300 dpi (courbe de calibration de l'abstention, balayage de k).

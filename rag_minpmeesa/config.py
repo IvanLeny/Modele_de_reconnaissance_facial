@@ -128,9 +128,16 @@ class ExpansionConfig:
 
 @dataclass
 class AbstentionConfig:
-    """Abstention : le système sait ne pas répondre (démarche §5)."""
+    """Abstention : le système sait ne pas répondre (démarche §5).
+
+    Le signal de confiance est le meilleur score lexical (BM25) parmi les
+    passages récupérés. BM25 mesure le recouvrement avec le vocabulaire métier
+    du corpus et s'effondre sur les requêtes hors périmètre ; il sépare nettement
+    les deux populations (calibration §5), là où le score de fusion normalisé,
+    toujours proche de 1 en tête, ne discrimine pas.
+    """
     enabled: bool = True
-    min_score: float = 0.015          # seuil sur le meilleur score de fusion
+    min_lexical_score: float = 12.0   # seuil sur le meilleur BM25 (calibré, étape 5)
 
 
 # --------------------------------------------------------------------------- #

@@ -108,6 +108,27 @@ class Answerer:
     def answer(self, query: str, results: List[RetrievalResult],
                mode: Mode = Mode.PRODUCTION) -> Answer:
         gcfg = self.settings.generation
+        acfg = self.settings.abstention
+
+        # Garde-fou d'abstention (démarche §5) : le système sait ne pas répondre.
+        # Le signal de confiance est le meilleur score lexical (BM25) parmi les
+        # passages récupérés : il mesure le recouvrement avec le vocabulaire
+        # métier du corpus et s'effondre hors périmètre (cf. calibration §5).
+        # En deçà du seuil calibré, aucune synthèse n'est produite.
+        lex_scores = [r.score_lexical for r in results if r.score_lexical is not None]
+        confidence = max(lex_scores) if lex_scores else None
+        if acfg.enabled and confidence is not None and confidence < acfg.min_lexical_score:
+            return Answer(
+                query=query, mode=Mode(mode).value, summary="",
+                refused=True,
+                message=("Aucune source suffisamment pertinente n'a été trouvée "
+                         "dans le corpus autorisé pour ce mode "
+                         f"(confiance lexicale {confidence:.2f} < seuil "
+                         f"{acfg.min_lexical_score:.2f}). Le système s'abstient de "
+                         "répondre plutôt que de produire une synthèse mal étayée."),
+                synthesis_method=gcfg.synthesis,
+            )
+
         blocks = build_context(results, max_chars=gcfg.max_context_chars)
 
         if not blocks:

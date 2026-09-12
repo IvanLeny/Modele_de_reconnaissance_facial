@@ -110,9 +110,43 @@ def test_production_can_reach_internal(engine):
     assert any(h.chunk.diffusion_status == DiffusionStatus.INTERNE for h in hits)
 
 
+def test_cloisonnement_couvre_tout_le_corpus(engine):
+    """Garantie de niveau requête : sur l'INTÉGRALITÉ du corpus, le filtre du
+    mode consultation n'autorise AUCUN passage interne. La propriété tient donc
+    quelle que soit la requête, puisque le cloisonnement est appliqué au filtrage,
+    avant tout scoring (démarche §0, propriété 2 : cloisonnement, jamais un
+    simple filtre d'affichage)."""
+    from rag_minpmeesa.retrieval.filters import mode_filter
+    chunks = engine.store.chunks
+    # Le corpus contient bien des passages internes (sinon le test ne prouve rien).
+    n_interne = sum(1 for c in chunks if c.diffusion_status == DiffusionStatus.INTERNE)
+    assert n_interne > 0
+    allowed = mode_filter(Mode.CONSULTATION).allowed_indices(chunks)
+    assert all(chunks[i].diffusion_status == DiffusionStatus.PUBLIE for i in allowed)
+    # En production, l'interne est bien inclus dans le périmètre autorisé.
+    allowed_prod = mode_filter(Mode.PRODUCTION).allowed_indices(chunks)
+    assert len(allowed_prod) > len(allowed)
+
+
 def test_answer_numeric_guardrail(engine):
     """Toute donnée chiffrée de la réponse est sourcée (exactitude = 1)."""
     ans = engine.query("trésorerie difficile des PME au 2e trimestre 2024",
                        mode=Mode.PRODUCTION)
     assert not ans.refused
     assert ans.numeric_audit.accuracy == 1.0
+
+
+def test_abstention_hors_perimetre(engine):
+    """Sur une requête hors périmètre (sujet absent du corpus), le système
+    s'abstient plutôt que de produire une synthèse mal étayée (démarche §5)."""
+    ans = engine.query("Qui a remporté la dernière Coupe d'Afrique des Nations ?",
+                       mode=Mode.PRODUCTION)
+    assert ans.refused
+    assert "abstient" in ans.message.lower() or "pertinent" in ans.message.lower()
+
+
+def test_abstention_repond_en_perimetre(engine):
+    """Sur une requête en périmètre, le système ne s'abstient pas."""
+    ans = engine.query("répartition du stock des PME par région",
+                       mode=Mode.PRODUCTION)
+    assert not ans.refused

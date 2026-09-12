@@ -1,0 +1,23 @@
+{
+  "description": "Requêtes HORS PÉRIMÈTRE pour la calibration de l'abstention (démarche §5). Sujets absents du corpus MINPMEESA (conjoncture PME / statistiques Cameroun). Le système DOIT s'abstenir sur ces requêtes. Rédigées indépendamment du corpus pour ne pas biaiser le seuil.",
+  "questions": [
+    "Quel est le prix actuel du baril de pétrole Brent sur les marchés ?",
+    "Qui a remporté la dernière Coupe d'Afrique des Nations de football ?",
+    "Quelle est la recette traditionnelle de la sauce arachide camerounaise ?",
+    "Combien d'habitants compte la ville de Tokyo en 2024 ?",
+    "Quelle est la distance entre la Terre et la planète Mars ?",
+    "Comment configurer un serveur web Apache sous Linux ?",
+    "Quels sont les symptômes de la grippe saisonnière chez l'enfant ?",
+    "Quel est le taux de change de l'euro face au yen japonais aujourd'hui ?",
+    "Quelle est la hauteur du Mont Cameroun en mètres ?",
+    "Quels films ont reçu l'Oscar du meilleur film cette année ?",
+    "Comment fonctionne la photosynthèse chez les plantes vertes ?",
+    "Quelle est la capitale de l'Australie et sa population ?",
+    "Quels sont les ingrédients d'un gâteau au chocolat classique ?",
+    "Quelle équipe a gagné le dernier championnat de basket NBA ?",
+    "Comment installer une bibliothèque Python avec le gestionnaire pip ?",
+    "Quel est le classement mondial actuel au tennis masculin ?",
+    "Quelle est la température moyenne à la surface du Soleil ?",
+    "Quels sont les principaux fleuves d'Amérique du Sud ?"
+  ]
+}
