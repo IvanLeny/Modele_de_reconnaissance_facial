@@ -67,3 +67,15 @@ def test_parametres_lus_depuis_config_yaml():
     assert s.retrieval.rrf_k == 60
     assert s.expansion.enabled in (True, False)
     assert 0.0 <= s.abstention.min_score <= 1.0
+
+
+def test_expansion_lexicale_declenche_les_synonymes():
+    """L'expansion relie « effectif » aux formulations « nombre / total » (§4)."""
+    from rag_minpmeesa.retrieval.expansion import QueryExpander
+    fam = [["effectif", "effectifs", "nombre", "total", "stock"],
+           ["pme", "petites et moyennes entreprises"]]
+    exp = QueryExpander(fam, max_expansions_per_term=4)
+    out = exp.expand("effectif des entreprises").split()
+    assert "nombre" in out and "total" in out
+    # Une famille non déclenchée n'ajoute rien.
+    assert "petites" not in exp.expand("effectif").split()

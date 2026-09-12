@@ -31,6 +31,7 @@ class RetrievalConfigRun:
     use_vector: bool = True
     use_reranker: bool = True
     label: str = "hybride+rerank"
+    use_expansion: bool = True     # expansion lexicale par lexique métier (ablation)
 
     @property
     def is_hybrid(self) -> bool:
@@ -53,6 +54,15 @@ class HybridRetriever:
         self.settings = settings or get_settings()
         self._reranker = reranker
         self._verbose = verbose
+        self._expander = "unset"      # construit paresseusement (voir expander)
+
+    @property
+    def expander(self):
+        """Expanseur de requête lexicale (lexique métier), ou None si désactivé."""
+        if self._expander == "unset":
+            from .expansion import build_expander
+            self._expander = build_expander(self.settings)
+        return self._expander
 
     @property
     def reranker(self) -> Reranker:
@@ -90,7 +100,12 @@ class HybridRetriever:
 
         ranked_lists = {}
         if run.use_lexical:
-            lex = [(i, s) for i, s in self.store.lexical.search(query, over) if i in allowed]
+            # Expansion métier appliquée à la SEULE requête lexicale (jamais au
+            # sémantique ni aux passages). Désactivable pour l'ablation.
+            lex_query = query
+            if run.use_expansion and self.expander is not None:
+                lex_query = self.expander.expand(query)
+            lex = [(i, s) for i, s in self.store.lexical.search(lex_query, over) if i in allowed]
             lex = lex[:cfg.top_k_lexical]
             ranked_lists["lexical"] = lex
         if run.use_vector:

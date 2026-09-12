@@ -1,0 +1,76 @@
+# =====================================================================
+#  Dictionnaire de synonymes métier — vocabulaire MINPMEESA (démarche §4)
+#  Chaque « famille » réunit un sigle, son libellé officiel et les
+#  formulations courantes. L'expansion est appliquée à la SEULE requête
+#  lexicale (jamais au sémantique, jamais aux passages).
+#  Désactivable par config.yaml (expansion.enabled) pour l'ablation.
+# =====================================================================
+familles:
+  # --- Entités et typologies d'entreprises ---
+  - [pme, "petites et moyennes entreprises", "petite et moyenne entreprise", "entreprises de petite taille"]
+  - [pmeesa, "petites et moyennes entreprises de l'economie sociale et de l'artisanat"]
+  - [tpe, "tres petite entreprise", "tres petites entreprises"]
+  - [pe, "petite entreprise", "petites entreprises"]
+  - [me, "moyenne entreprise", "moyennes entreprises"]
+  - [ge, "grande entreprise", "grandes entreprises"]
+  - [entreprise, entreprises, societe, societes, unite, unites]
+  - [promoteur, dirigeant, "chef d'entreprise", "chefs d'entreprise", entrepreneur]
+
+  # --- Économie sociale et artisanat ---
+  - [oes, "organisations de l'economie sociale", "organisation de l'economie sociale"]
+  - [ess, "economie sociale et solidaire", "economie sociale"]
+  - [upa, "unites de production artisanale", "unite de production artisanale"]
+  - [artisanat, "secteur artisanal", artisan, artisans, artisanale]
+  - [cooperative, cooperatives, mutuelle, mutuelles, association, associations]
+
+  # --- Structures et dispositifs d'appui ---
+  - [cfce, "centres de formalites de creation d'entreprises", "centre de formalites"]
+  - [bcpme, "bc-pme", "banque camerounaise des petites et moyennes entreprises", "banque des pme"]
+  - [apme, "agence de promotion des pme", "agence de promotion des petites et moyennes entreprises"]
+  - [minpmeesa, "ministere des petites et moyennes entreprises de l'economie sociale et de l'artisanat", ministere]
+  - [depp, "division des etudes des projets et de la prospective"]
+  - [ins, "institut national de la statistique"]
+  - [beac, "banque des etats de l'afrique centrale"]
+  - [cemac, "communaute economique et monetaire de l'afrique centrale"]
+
+  # --- Indicateurs et grandeurs ---
+  - [effectif, effectifs, nombre, total, stock, quantite, denombrement]
+  - [creation, creations, immatriculation, immatriculations, "creees", enregistrement, enregistrements]
+  - [chiffre_affaires, "chiffre d'affaires", ca, "chiffres d'affaires"]
+  - [valeur_ajoutee, "valeur ajoutee", va]
+  - [emploi, emplois, "creation d'emplois", recrutement, embauche, "main d'oeuvre"]
+  - [investissement, investissements, "depenses d'investissement"]
+  - [tresorerie, liquidite, "situation de tresorerie", "besoin de financement"]
+  - [financement, financements, credit, credits, pret, prets, subvention, subventions]
+  - [production, "cout de production", "couts de production", produire]
+  - [prix, "prix de vente", tarif, tarifs, cout, couts]
+  - [inflation, "hausse des prix", "niveau des prix", ihpc, "indice des prix"]
+  - [croissance, "taux de croissance", expansion, progression]
+  - [activite, activites, "niveau d'activite", "chiffre d'activite"]
+  - [resultat, "resultat net", benefice, benefices, marge, marges]
+  - [taux, proportion, part, pourcentage, ratio]
+  - [repartition, distribution, ventilation, structure]
+  - [evolution, variation, tendance, dynamique]
+
+  # --- Découpages sectoriels et territoriaux ---
+  - [secteur, branche, branches, filiere, filieres, "secteur d'activite"]
+  - [primaire, "secteur primaire", agriculture, "agro-industrie", agroalimentaire]
+  - [secondaire, "secteur secondaire", industrie, industries, transformation, manufacture]
+  - [tertiaire, "secteur tertiaire", services, commerce, "commerce general"]
+  - [btp, "batiment et travaux publics", construction]
+  - [region, regions, "delegation regionale", localite, territoire]
+  - [national, cameroun, pays, "au niveau national"]
+
+  # --- Publications et documents ---
+  - [annuaire, "annuaire statistique", "annuaire statistique des pmeesa"]
+  - [rap, "rapport annuel de performance", "rapport de performance"]
+  - [conjoncture, "note de conjoncture", "notes de conjoncture"]
+  - [performance, "indicateur de performance", "indicateurs de performance"]
+  - [programme, programmes, "budget-programme", action, actions]
+  - [enquete, enquetes, "enquete conjoncturelle", collecte, "collecte de donnees"]
+  - [exercice, annee, "annee de reference", periode, millesime]
+  - [trimestre, trimestriel, trimestrielle, t1, t2, t3, t4]
+
+  # --- Temporalité / comparaison ---
+  - [augmentation, hausse, accroissement, progression, croissance]
+  - [baisse, diminution, recul, reduction, ralentissement, contraction]
