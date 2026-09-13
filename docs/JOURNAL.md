@@ -122,11 +122,28 @@ Commandes : `python -m rag_minpmeesa.app.cli stats` et `… figures`.
   balayage de k (C3/C4) et calibration de l'abstention (distributions des
   confiances + sensibilité/spécificité selon le seuil).
 
+## Étape 3/10 — Interfaces modèles + démonstration
+- **Abstraction Encoder / Reranker + bascule automatique** (déjà en place,
+  conservée) : `index/embeddings.py` (`EmbeddingBackend` → `TransformerEmbedding`
+  / `TfidfEmbedding`, mode `auto`) et `retrieval/rerank.py` (`Reranker` →
+  `CrossEncoderReranker` / `FeatureReranker`, mode `auto`). Le backend effectif
+  est journalisé dans les métadonnées de l'index. Le mode LLM lit désormais
+  `config.yaml` (restitution.llm_base_url / llm_model), plus seulement les
+  variables d'environnement.
+- **`docs/INSTALLATION.md`** : installation hors-ligne, commandes CLI (build,
+  query, harness, ablations, calibration, stats, figures), et passage en
+  configuration de référence (transfert des caches de modèles transformeurs +
+  `HF_HUB_OFFLINE`, Ollama pour le mode LLM), reproductibilité.
+- **`docs/DEMONSTRATION.md`** : scénario de 5 requêtes, **sorties réelles du
+  moteur** (reproductibles), illustrant les 4 propriétés non négociables —
+  réponse sourcée, citation littérale d'un nombre, abstention hors périmètre
+  (confiance 8,74 < 12,0), cloisonnement production/consultation, rejet d'une
+  valeur numérique non sourcée (garde-fou du mode LLM).
+
 ---
 
-## À faire (étapes restantes)
-- **Étape 3/10** — Protocoles Encoder/Reranker + bascule automatique,
-  `docs/INSTALLATION.md`, `docs/DEMONSTRATION.md` (scénario 5 requêtes).
-- **Côté terrain (machine de l'utilisateur)** — corpus ≥ 1000 passages + RAP,
-  transfert des caches de modèles + Ollama, jeu de test ≥ 50 questions
-  doublement annotées (kappa), C0/C5 avec LLM, mesure du gain opérationnel.
+## À faire (côté terrain — machine de l'utilisateur)
+- Corpus ≥ 1000 passages + intégration du RAP.
+- Transfert des caches de modèles + Ollama (voir `docs/INSTALLATION.md` §4).
+- Jeu de test ≥ 50 questions doublement annotées (kappa d'accord inter-annotateurs).
+- Exécution de C0/C5 avec le LLM local ; mesure du gain opérationnel en session.

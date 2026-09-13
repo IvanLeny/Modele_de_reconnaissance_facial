@@ -254,8 +254,12 @@ class Answerer:
         RAG_LLM_MODEL (par ex. un serveur Ollama local). Renvoie (None, "") si
         indisponible, pour bascule sur l'extractif.
         """
-        base = os.environ.get("RAG_LLM_BASE_URL")
-        model = os.environ.get("RAG_LLM_MODEL")
+        # Priorité à la variable d'environnement (rejouer une expérience), puis à
+        # config.yaml (restitution.llm_base_url / llm_model). Le code ne code
+        # aucune valeur en dur (démarche §1).
+        gcfg = self.settings.generation
+        base = os.environ.get("RAG_LLM_BASE_URL") or gcfg.llm_base_url
+        model = os.environ.get("RAG_LLM_MODEL") or gcfg.llm_model
         if not base or not model:
             return None, ""
         try:
