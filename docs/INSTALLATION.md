@@ -62,6 +62,26 @@ Les sorties horodatées sont écrites dans `outputs/runs/` et `outputs/figures/`
 
 ## 4. Passer en configuration de référence (modèles locaux)
 
+### 4.0 Voie rapide : script clé en main + vérification
+
+Sur une machine **autorisée** (accès réseau), un seul script installe et met en
+cache les trois modèles de référence (encodeur, cross-encodeur, LLM Ollama) :
+
+```bash
+bash scripts/setup_modeles.sh          # RAG_SETUP_LLM=qwen2.5:7b pour un autre LLM
+```
+
+À tout moment, un diagnostic indique ce qui est prêt et ce qui manque (ne
+télécharge rien) :
+
+```bash
+python -m rag_minpmeesa.app.cli doctor
+```
+
+Il renvoie un code de sortie 0 si l'encodeur de référence est disponible, 1
+sinon (le système bascule alors sur le substitut hors-ligne). Les sections
+4.1–4.2 détaillent la procédure manuelle sous-jacente.
+
 ### 4.1 Encodeur et réordonnanceur (transformeurs)
 
 Sur une machine sans accès au dépôt de modèles, **transférer le cache** depuis

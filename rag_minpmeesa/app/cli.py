@@ -95,6 +95,13 @@ def cmd_figures(args):
     run_figures(verbose=True)
 
 
+def cmd_doctor(args):
+    """Diagnostic des modèles de référence (encodeur, cross-encodeur, LLM) (démarche §3)."""
+    import sys
+    from .diagnostics import run_doctor
+    sys.exit(run_doctor())
+
+
 def cmd_info(args):
     settings = get_settings()
     eng = RAGEngine()
@@ -127,6 +134,7 @@ def main(argv=None):
     sub.add_parser("calibration", help="calibration du seuil d'abstention (démarche §5)").set_defaults(func=cmd_calibration)
     sub.add_parser("stats", help="statistiques inférentielles : Wilcoxon, win/lose/tie, Kendall (démarche §9)").set_defaults(func=cmd_stats)
     sub.add_parser("figures", help="figures d'évaluation 300 dpi (démarche §9)").set_defaults(func=cmd_figures)
+    sub.add_parser("doctor", help="diagnostic des modèles de référence : encodeur, rerank, LLM (démarche §3)").set_defaults(func=cmd_doctor)
     sub.add_parser("info", help="état de l'index").set_defaults(func=cmd_info)
 
     args = p.parse_args(argv)

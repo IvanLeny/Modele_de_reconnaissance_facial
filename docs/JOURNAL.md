@@ -139,6 +139,15 @@ Commandes : `python -m rag_minpmeesa.app.cli stats` et `… figures`.
   réponse sourcée, citation littérale d'un nombre, abstention hors périmètre
   (confiance 8,74 < 12,0), cloisonnement production/consultation, rejet d'une
   valeur numérique non sourcée (garde-fou du mode LLM).
+- **Volet « modèles » (§3) — outillage pour la machine cible.** L'environnement
+  d'exécution cloud interdit le téléchargement des modèles (proxy 403) : la
+  configuration de référence ne peut donc s'activer que sur la machine de
+  l'utilisateur. Deux outils ajoutés pour rendre cette bascule sûre et simple :
+  - commande `doctor` (`app/diagnostics.py`) : teste la disponibilité de
+    l'encodeur transformeur, du cross-encodeur et d'Ollama, indique ce qui
+    manque, et renvoie un code de sortie exploitable en CI ;
+  - script `scripts/setup_modeles.sh` : installe les bibliothèques, met en cache
+    les modèles de référence et récupère le LLM via Ollama, en une commande.
 
 ---
 
