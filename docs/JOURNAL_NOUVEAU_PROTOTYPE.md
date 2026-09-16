@@ -90,3 +90,27 @@ colonnes.
 d'en-tête redondant lorsque la ligne d'unités est lacunaire (ex. « Effectif · % »).
 La correspondance valeur ↔ (ligne, exercice, unité) reste correcte ; seul
 l'affichage du chemin est parfois verbeux. Tests : `tests/test_src_tables.py`.
+
+## Étape 7 — Garde-fous (cœur de la contribution)
+
+Les garde-fous opèrent APRÈS la génération, sur le texte produit, indépendamment
+du modèle (règle d'architecture centrale du cahier des charges).
+
+- **Citation littérale** (`src/guards/numeric.py`), 4 règles : normalisation des
+  séparateurs/marques décimales ; exclusion des millésimes ; interdiction du
+  recalcul (comparaison littérale, aucune valeur dérivée) ; **portée = bloc de
+  données de l'exercice, jamais les commentaires antérieurs**. Une valeur non
+  appariée entraîne le retrait de la proposition + signalement.
+- **Traçabilité** (`src/guards/provenance.py`), 2 niveaux : proposition chiffrée
+  → tableau de l'Annuaire ; proposition d'interprétation → commentaire antérieur
+  dont la formulation est reprise (rapprochement par similarité de tokens).
+- **Abstention** (`src/guards/abstention.py`), 2 déclencheurs : absence de
+  tableau/valeurs (univoque) ; faiblesse du contexte de référence (score de
+  confiance à seuil **calibré** à l'étape 9, jamais choisi).
+
+Vérifié sur exemples contrôlés (`tests/test_src_guards.py`, 10 tests), dont les
+deux cas décisifs du cahier des charges :
+- une **valeur inventée** (5,9 %) voit sa proposition retirée ;
+- une **valeur d'un commentaire antérieur** (393 166 PME) absente du bloc de
+  données de l'exercice voit aussi sa proposition retirée (motif : révision des
+  estimations — l'Annuaire contemporain indique 393 175).
