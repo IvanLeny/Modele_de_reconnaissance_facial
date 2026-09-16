@@ -1,0 +1,16 @@
+﻿code_indicateur;exercice;graphique_n;graphique_intitule;tableau_n;tableau_intitule;score;statut
+pme-region-repartition-stock;2024;1;Répartition du stock des PME en 2024 par région (en %);4;Répartition du stock des PME par Région;1.0;candidat
+activite-evolution-pme-secteur-selon-stock;2024;2;Évolution du stock des PME selon le secteur d’activité de 2016 à 2024 (en %);17;Évolution de la Valeur Ajoutée des PME de 2018 à 2024 selon le secteur d’activité (en millions;0.556;candidat
+age-groupe-pme-promoteur-repartition-stock;2024;3;Répartition du stock des PME en 2024 par groupe d’âge du promoteur (en %);6;Répartition du stock des PME selon la tranche d’âge du Promoteur/Dirigeant;0.556;candidat
+cfce-crees-evolution-nombre-pme;2024;4;Évolution du nombre de PME crées dans les CFCE de 2019 à;7;Évolution du nombre de PME créées dans les CFCE entre 2018 et;0.571;candidat
+cfce-creees-evolution-pme-proportion-repartition;2024;5;Répartition et évolution de la proportion PME créées dans les CFCE par secteur;8;Évolution du nombre de PME créées dans les CFCE entre 2018 et 2024 selon le secteur d’activité;0.455;candidat
+cfce-crees-evolution-pme-proportion-region;2024;6;Répartition et évolution de la proportion de PME crées dans les CFCE par région de;4;Répartition du stock des PME par Région;0.375;candidat
+cfce-creees-evolution-genre-pme-promoteur;2024;7;Évolution de la proportion de PME créées dans les CFCE selon le genre du promoteur;11;Évolution du nombre de PME créées dans les CFCE entre 2018 et 2024 selon le genre;0.6;candidat
+creees-evolution-nombre-oes;2024;8;Évolution du nombre des OES créées de 2020 à;7;Évolution du nombre de PME créées dans les CFCE entre 2018 et;0.429;candidat
+creees-oes-region-repartition-selon;2024;9;Répartition des OES créées en 2024 selon la région (en %);21;Répartition des OES créées entre 2020 et 2024 selon la région;0.833;candidat
+activites-creees-evolution-oes-proportion-repartition;2024;10;Répartition et évolution de la proportion des OES créées par secteur d’activités de;21;Répartition des OES créées entre 2020 et 2024 selon la région;0.3;candidat
+bca-enregistrees-evolution-nombre-upa;2024;11;Évolution du nombre d’UPA enregistrées dans les BCA de 2019 à;28;Évolution du nombre d’UPA enregistrées dans les Bureaux Communaux de 2018 à 2024 selon la;0.5;candidat
+bca-enregistrees-evolution-genre-proportion-selon;2024;12;Évolution de la proportion des UPA enregistrées dans les BCA selon le genre du;28;Évolution du nombre d’UPA enregistrées dans les Bureaux Communaux de 2018 à 2024 selon la;0.4;candidat
+artisanat-enregistrees-proportion-region-repartition-typologie;2024;13;Répartition de la proportion d’UPA enregistrées par typologie d’artisanat et par région;22;Répartition des OES enregistrées selon le secteur d’activité et par région entre 2020 et;0.25;à_vérifier
+entre-evolution-pme-typologie;2024;14;Évolution de la VA des PME entre 2018 et 2024 par typologie;7;Évolution du nombre de PME créées dans les CFCE entre 2018 et;0.429;candidat
+activite-entre-evolution-pme-secteur-selon;2024;15;Évolution de la VA des PME entre 2018 et 2024 selon le secteur d’activité;8;Évolution du nombre de PME créées dans les CFCE entre 2018 et 2024 selon le secteur d’activité;0.667;candidat

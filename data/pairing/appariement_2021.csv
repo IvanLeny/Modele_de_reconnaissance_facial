@@ -1,0 +1,10 @@
+﻿code_indicateur;exercice;graphique_n;graphique_intitule;tableau_n;tableau_intitule;score;statut
+pme-region-repartition-stock;2021;1;Répartition du stock des PME par région;3;Répartition des PME par région en;0.75;candidat
+creees-evolution-periode-pme;2021;2;Evolution des PME créées sur la période 2016-2021;7;Evolution du nombre de PME créées dans les CFCE selon le sexe du promoteur 2016 à;0.333;candidat
+creees-croissance-economique-evolution-pme;2021;3;Evolution de la croissance économique et des PME créées (%);7;Evolution du nombre de PME créées dans les CFCE selon le sexe du promoteur 2016 à;0.3;candidat
+creees-forme-juridique-pme-region-repartition;2021;4;Répartition des PME créées en 2021 par Région et selon la forme juridique;8;Evolution du nombre de PME créées dans les CFCE selon la forme juridique de 2016 à;0.5;candidat
+creees-entreprise-pme-region-repartition-selon;2021;5;Répartition des PME créées en 2021 par Région selon la typologie d'entreprise;4;Répartition des PME selon la typologie d’entreprise en;0.714;candidat
+activite-creees-pme-repartition-secteur-selon;2021;6;Répartition des PME créées en 2021 selon le secteur d'activité (%);2;Répartition des PME selon le secteur d’activité en;0.833;candidat
+activite-branche-creees-oes-repartition-secteur;2021;7;Répartition des OES créées selon le secteur d'activité et selon la branche;15;Répartition des OES créées selon le secteur d’activité et par région en;0.75;candidat
+artisans-bureaux-communaux-enregistrements-evolution;2021;8;évolution des enregistrements des artisans dans les bureaux communaux;18;Evolution des UPA enregistrées dans les Bureaux Communaux selon le type d’artisanat de 2016 à;0.3;candidat
+artisanat-artisans-enregistrements-repartition-type;2021;9;Répartition des enregistrements des artisans par type d'artisanat (%);31;Répartition du chiffre d’affaires des artisans par filière de 2018 à 2020;0.25;à_vérifier

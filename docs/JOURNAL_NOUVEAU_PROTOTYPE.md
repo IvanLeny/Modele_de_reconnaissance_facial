@@ -114,3 +114,35 @@ deux cas décisifs du cahier des charges :
 - une **valeur d'un commentaire antérieur** (393 166 PME) absente du bloc de
   données de l'exercice voit aussi sa proposition retirée (motif : révision des
   estimations — l'Annuaire contemporain indique 393 175).
+
+## Étape 3 — Table d'appariement
+
+`src/pairing/build.py` extrait les intitulés des **graphiques** des rapports et
+des **tableaux** des annuaires, puis propose des appariements candidats par
+similarité de libellé (Jaccard de tokens), avec un **code indicateur stable**
+d'une édition à l'autre (année et unités neutralisées). `src/pairing/schema.py`
+fournit le contrôle de cohérence (chaque code dans ≥ 2 éditions) et le **kappa de
+Cohen** pour la double saisie.
+
+Le cahier des charges impose une validation **manuelle** avec double saisie : ce
+module prépare le fichier de travail (`data/pairing/appariement_<exercice>.csv`,
+colonne `statut` = candidat / à_vérifier), il ne tranche pas.
+
+**Résultats (candidats, score ≥ 0,30) :**
+
+| Exercice | Graphiques | Appariements candidats |
+| --- | --- | --- |
+| 2021 | 9 | 8 |
+| 2022 | 15 | 13 |
+| 2023 | 19 | 15 |
+| 2024 | 15 | 14 |
+
+Exemples corrects à score élevé : G1→T4 (répartition par région, 0,67),
+G4→T7 (PME créées dans les CFCE, 0,83). Les cas ambigus (ex. OES) sont marqués
+« à_vérifier » pour arbitrage humain. Tests : `tests/test_src_pairing.py`.
+
+### Valeurs à reporter au mémoire (§8)
+- Nombre de graphiques commentés par rapport : 2021 : 9 ; 2022 : 15 ; 2023 : 19 ;
+  2024 : 15.
+- Taux d'accord de la double saisie (kappa) : à calculer après la double
+  annotation manuelle (fonction `cohen_kappa` prête).
