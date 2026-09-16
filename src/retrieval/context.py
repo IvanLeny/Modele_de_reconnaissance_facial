@@ -51,20 +51,36 @@ def _valeurs_texte(rows) -> List[str]:
 
 
 def assembler_contexte(store: Store, code_indicateur: str, exercice: int,
-                       max_valeurs: int = 60, max_commentaires: int = 4) -> Contexte:
+                       intitule: str = "", max_valeurs: int = 60,
+                       max_commentaires: int = 4) -> Contexte:
     """Assemble le contexte pour (code indicateur, exercice N). Le filtrage
-    temporel est réalisé par les requêtes du dépôt (clause WHERE)."""
+    temporel est réalisé par les requêtes du dépôt (clause WHERE).
+
+    Si `intitule` est fourni, les valeurs sont ciblées par recoupement de sens
+    (valeurs_indicateur) ; sinon par l'appariement code→tableau (valeurs_exercice).
+    """
     ctx = Contexte(exercice=exercice, code_indicateur=code_indicateur)
 
-    vals_n = store.valeurs_exercice(exercice, code_indicateur)
+    if intitule:
+        vals_n = store.valeurs_indicateur(exercice, intitule)
+        ant = []
+        for ex in range(exercice - 1, exercice - 4, -1):
+            ant += store.valeurs_indicateur(ex, intitule)
+    else:
+        vals_n = store.valeurs_exercice(exercice, code_indicateur)
+        ant = []
+        for ex in range(exercice - 1, exercice - 4, -1):
+            ant += store.valeurs_exercice(ex, code_indicateur)
     ctx.valeurs_n = _valeurs_texte(vals_n)[:max_valeurs]
+    ctx.valeurs_anterieures = _valeurs_texte(ant)[:max_valeurs]
 
-    # Valeurs antérieures : mêmes libellés, exercices précédents (contexte).
-    ant = []
-    for ex in range(exercice - 1, exercice - 4, -1):
-        ant += _valeurs_texte(store.valeurs_exercice(ex, code_indicateur))
-    ctx.valeurs_anterieures = ant[:max_valeurs]
-
-    coms = store.commentaires_anterieurs(code_indicateur, exercice)
+    # Homologues antérieurs : par code exact, complété par similarité d'intitulé
+    # (le code peut varier légèrement d'une édition à l'autre).
+    coms = list(store.commentaires_anterieurs(code_indicateur, exercice))
+    if intitule:
+        vus = {c["texte"] for c in coms}
+        for c in store.commentaires_similaires(intitule, exercice):
+            if c["texte"] not in vus:
+                coms.append(c)
     ctx.commentaires_anterieurs = [c["texte"] for c in coms][:max_commentaires]
     return ctx

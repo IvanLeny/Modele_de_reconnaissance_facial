@@ -177,3 +177,37 @@ tests hors-ligne. On bascule par `config.yaml` sans changer le code.
   reprise **sans aucune de ses valeurs** (`tests/test_src_generation.py`).
 
 **41 tests au total pour le nouveau prototype.**
+
+## Étapes 8-9 — Harnais d'évaluation et statistiques
+
+`src/ingestion/ingest.py` peuple le dépôt depuis le vrai corpus (valeurs des
+annuaires ; commentaires des rapports segmentés par graphique, hors sommaire) et
+fournit le commentaire publié de référence par (exercice, indicateur).
+`src/eval/metrics.py` (ROUGE-1/2/L, similarité, ancrage, couverture, toutes
+bornées ≤ 1), `src/eval/runner.py` (C0–C4 + baseline naïve, 5 sorties CSV +
+textes produits + run_metadata) et `src/eval/stats.py` (Wilcoxon apparié,
+win/lose/tie, granularité 1/n, figures 300 dpi).
+
+**Résultats mesurés (régime dégradé, 57 unités évaluables) :**
+
+| Comparaison (ROUGE-1) | Δ moyen | gagne/perd/égal | p (Wilcoxon) |
+| --- | --- | --- | --- |
+| C1 vs C0 (apport de l'ancrage) | **+0,163** | 34 / 0 / 23 | ≈ 0 |
+| C2 vs C1 (filtrage) | 0 | 0 / 0 / 57 | — |
+| C3 vs C2 (garde-fous + abstention) | −0,144 | 0 / 34 / 23 | ≈ 0 |
+
+- **C1 ≫ C0** : ajouter les commentaires homologues antérieurs améliore
+  significativement la qualité rédactionnelle (résultat net, 34 gains / 0 perte).
+- **C3 < C2 en ROUGE mais exactitude ↑ (0,935 → 0,957) et abstention 40 %** :
+  c'est le compromis fidélité/couverture au cœur de H2 — le système complet
+  préfère écarter ou s'abstenir plutôt que produire un énoncé mal étayé.
+- Granularité 1/n = 0,0175 : les écarts inférieurs ne sont pas interprétés.
+- Figures : `figure_generation_configs.png`, `figure_generation_exactitude_couverture.png`.
+
+**Limites honnêtes du régime dégradé (à lever sur la machine cible) :**
+- sans LLM, C0/C1/C2/C4 partagent le générateur extractif : leurs écarts fins
+  ne se révèlent pleinement qu'en régime de référence (Ollama) ;
+- l'appariement automatique (codes dérivés des intitulés) n'aligne les
+  homologues consécutifs que pour une minorité d'indicateurs ; la **table
+  d'appariement validée à la main** (Étape 3) fournira les codes stables qui
+  renforceront C1/C3 et la baseline.

@@ -107,3 +107,44 @@ class Store:
         self.conn.execute(
             "INSERT OR REPLACE INTO appariement VALUES(?,?,?,?,?)",
             (code_indicateur, exercice, graphique_n, tableau_n, intitule))
+
+    def commentaires_similaires(self, intitule: str, exercice: int,
+                                seuil: float = 0.4) -> List[sqlite3.Row]:
+        """Commentaires des exercices ANTÉRIEURS dont l'indicateur a un intitulé
+        proche (homologues), même si le code exact diffère d'une édition à
+        l'autre. Filtrage temporel dans le WHERE (exercice < N)."""
+        from .text import jaccard_tokens
+        rows = self.conn.execute(
+            "SELECT p.*, a.intitule AS intitule FROM passages p "
+            "LEFT JOIN appariement a ON a.code_indicateur=p.code_indicateur "
+            "AND a.exercice=p.exercice WHERE p.exercice < ? ORDER BY p.exercice DESC",
+            (exercice,)).fetchall()
+        out = []
+        for r in rows:
+            inti = r["intitule"] or ""
+            if jaccard_tokens(intitule, inti) >= seuil:
+                out.append(r)
+        return out
+
+    def valeurs_indicateur(self, exercice: int, intitule: str, limit: int = 40) -> List[sqlite3.Row]:
+        """Valeurs de l'exercice dont les libellés (ligne/colonne) recoupent
+        l'intitulé de l'indicateur. Filtrage par tokens (le lien exact
+        valeur↔tableau n'étant pas toujours disponible, on cible par le sens)."""
+        from .text import tokens
+        cible = tokens(intitule)
+        rows = self.conn.execute(
+            "SELECT * FROM tableaux WHERE exercice=?", (exercice,)).fetchall()
+        notes = []
+        for r in rows:
+            lib = tokens(f"{r['ligne']} {r['colonne']}")
+            score = len(lib & cible) / len(lib | cible) if (lib or cible) else 0.0
+            if score > 0:
+                notes.append((score, r))
+        notes.sort(key=lambda x: x[0], reverse=True)
+        if notes:
+            return [r for _, r in notes[:limit]]
+        # Repli : si aucun libellé ne recoupe l'intitulé, on renvoie tout de même
+        # les premières valeurs de l'exercice (le bloc de données existe bel et
+        # bien — l'Annuaire de l'exercice —, l'abstention ne doit pas se déclencher
+        # à tort au titre « aucune valeur »).
+        return rows[:limit]
