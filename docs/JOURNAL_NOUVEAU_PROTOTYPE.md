@@ -64,3 +64,29 @@ colonnes.
   33 p., 19 graphiques ; Rapport 2024 : 42 p., 15 graphiques).
 - Taille de passage / recouvrement : à fixer dans `config.yaml` à l'étape de
   segmentation.
+
+## Étape 2 — Traitement des tableaux
+
+`src/ingestion/tables.py` linéarise chaque tableau en **énoncés élémentaires**
+« ligne | colonne = valeur », en conservant la correspondance valeur ↔ en-têtes.
+
+- **En-têtes multi-niveaux** (exercice + unité) reconstitués par remplissage
+  horizontal des cellules fusionnées puis composition du chemin de colonne :
+  la valeur `342` devient « Primaire | 2016 · Effectif = 342 ».
+- **Millésimes** (« 2016 », « 2023 (e) ») traités comme en-têtes temporels, pas
+  comme des valeurs (`_is_data_value`).
+- Extraction fondée sur `page.find_tables` de PyMuPDF.
+
+**Valeurs mesurées (matière pour le mémoire §2.3.1 / §8) :**
+
+| Annuaire | Tableaux exploitables | Valeurs linéarisées |
+| --- | --- | --- |
+| 2021 | 60 | 1 443 |
+| 2022 | 36 | 556 |
+| 2023 | 83 | 2 161 |
+| 2024 | 92 | 2 368 |
+
+**Limite connue, à documenter :** le chemin de colonne peut comporter un jeton
+d'en-tête redondant lorsque la ligne d'unités est lacunaire (ex. « Effectif · % »).
+La correspondance valeur ↔ (ligne, exercice, unité) reste correcte ; seul
+l'affichage du chemin est parfois verbeux. Tests : `tests/test_src_tables.py`.
