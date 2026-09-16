@@ -211,3 +211,22 @@ win/lose/tie, granularité 1/n, figures 300 dpi).
   homologues consécutifs que pour une minorité d'indicateurs ; la **table
   d'appariement validée à la main** (Étape 3) fournira les codes stables qui
   renforceront C1/C3 et la baseline.
+
+## Étape 10 — Interface, démonstration et documentation
+
+- `src/app/main.py` : interface Streamlit à **trois espaces** (ingestion,
+  génération, export validé), sans aucune fonctionnalité superflue. Les trois
+  affichages qui portent les garanties sont présents : référence par proposition,
+  signalement d'une proposition écartée, message d'abstention. Aucun commentaire
+  n'est exporté sans validation humaine (case « Valider » par proposition).
+- `src/app/cli.py` : même chaîne hors interface — commande `demo` (scénario en
+  5 temps) et `generer`.
+- `docs/DEMONSTRATION_NOUVEAU.md` : scénario en 5 temps avec **sorties réelles**
+  (dont valeur antérieure écartée et valeur inventée écartée).
+- `docs/INSTALLATION_NOUVEAU.md` : exécution en mode dégradé, puis bascule en
+  régime de référence (Ollama + PostgreSQL/pgvector) par `config.yaml`.
+
+À ce stade, **les dix étapes du cahier des charges sont couvertes**, avec 66
+tests verts. Ce qui reste strictement dépendant de la machine cible : les
+chiffres finaux C0/C1 sous LLM, l'empreinte mémoire du modèle (§8), et la
+validation manuelle de la table d'appariement (double saisie + kappa).
