@@ -230,3 +230,19 @@ win/lose/tie, granularité 1/n, figures 300 dpi).
 tests verts. Ce qui reste strictement dépendant de la machine cible : les
 chiffres finaux C0/C1 sous LLM, l'empreinte mémoire du modèle (§8), et la
 validation manuelle de la table d'appariement (double saisie + kappa).
+
+## Étape 4a (suite) — PostgreSQL sur la machine cible
+
+- `db/schema_pg.sql` : schéma PostgreSQL **sans pgvector** (applicable tel quel
+  sous Windows, où pgvector n'est pas installé par défaut). La récupération étant
+  structurée (code indicateur, intitulé, filtrage temporel SQL), la colonne
+  vectorielle n'est pas nécessaire ; pgvector reste une extension future
+  (`db/schema.sql`).
+- `src/retrieval/pg_store.py` : dépôt PostgreSQL (psycopg2), **même interface**
+  que le dépôt SQLite ; filtrage temporel dans la clause WHERE.
+- `src/ingestion/ingest_postgres.py` : crée le schéma, ingère le corpus dans
+  PostgreSQL, vérifie que le filtrage temporel exclut tout exercice ≥ N, et
+  affiche les compteurs (persistance vérifiable après réouverture).
+- L'ingestion est factorisée (`ingest.populate`) : le MÊME code peuple SQLite ou
+  PostgreSQL. La bascule se fait par la variable RAG_PG_DSN / `config.yaml`.
+- Environnement cible relevé : **PostgreSQL 18** (§3.1.5).

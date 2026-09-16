@@ -19,5 +19,9 @@ matplotlib>=3.7        # figures d'évaluation 300 dpi (chapitre 4)
 # bascule sur le substitut hors-ligne si aucun modèle n'est accessible
 # (voir rag_minpmeesa/index/embeddings.py).
 
+# Stockage PostgreSQL (machine cible, Étape 4a) — pilote installé par wheel,
+# sans compilation. Non requis pour le mode SQLite de développement.
+psycopg2-binary>=2.9   # connexion PostgreSQL (src/retrieval/pg_store.py)
+
 # Tests
 pytest>=7.0

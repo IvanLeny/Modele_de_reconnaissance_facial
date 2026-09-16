@@ -60,9 +60,11 @@ class Referentiel:
     intitule: Dict[Tuple[int, str], str] = field(default_factory=dict)
 
 
-def build_store(corpus_dir: str = "data/corpus", verbose: bool = False) -> Tuple[Store, Referentiel]:
+def populate(store, corpus_dir: str = "data/corpus", verbose: bool = False) -> Referentiel:
+    """Peuple un dépôt QUELCONQUE (SQLite ou PostgreSQL) depuis le corpus et
+    renvoie les références d'évaluation. Le dépôt doit exposer l'interface
+    add_document / add_valeur / add_passage / add_appariement / commit."""
     corpus = Path(corpus_dir)
-    store = Store(":memory:")
     ref = Referentiel()
 
     for exercice, (rap, ann) in COUPLES.items():
@@ -96,4 +98,11 @@ def build_store(corpus_dir: str = "data/corpus", verbose: bool = False) -> Tuple
             print(f"  exercice {exercice}: {len(graphs)} graphiques, "
                   f"{len(segments)} commentaires segmentés")
     store.commit()
+    return ref
+
+
+def build_store(corpus_dir: str = "data/corpus", verbose: bool = False) -> Tuple[Store, Referentiel]:
+    """Construit un dépôt SQLite en mémoire peuplé (développement/évaluation)."""
+    store = Store(":memory:")
+    ref = populate(store, corpus_dir, verbose)
     return store, ref
