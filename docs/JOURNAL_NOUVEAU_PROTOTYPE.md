@@ -146,3 +146,34 @@ G4→T7 (PME créées dans les CFCE, 0,83). Les cas ambigus (ex. OES) sont marqu
   2024 : 15.
 - Taux d'accord de la double saisie (kappa) : à calculer après la double
   annotation manuelle (fonction `cohen_kappa` prête).
+
+## Étapes 4a / 5 / 6 — Stockage, récupération, génération
+
+### Stockage (Étape 4a)
+`db/schema.sql` définit le schéma PostgreSQL + pgvector (documents, passages,
+tableaux, appariement) pour la machine cible. `src/retrieval/store.py` en fournit
+une réalisation **SQLite** (même schéma logique) pour le développement et les
+tests hors-ligne. On bascule par `config.yaml` sans changer le code.
+
+### Récupération du contexte (Étape 5)
+- **Filtrage temporel strict** dans la clause WHERE (`commentaires_anterieurs` :
+  `WHERE code=? AND exercice < N`). Test dédié : aucun passage d'exercice ≥ N ne
+  remonte, vérifié pour tous les N (`tests/test_src_retrieval.py`).
+- **Assemblage du contexte en trois blocs étiquetés** (`retrieval/context.py`) :
+  valeurs de l'exercice N (seules citables), valeurs antérieures (contexte),
+  commentaires antérieurs (patron de forme). Le `bloc_donnees()` est le seul
+  contexte transmis au garde-fou numérique.
+
+### Génération contrainte (Étape 6)
+- **Instruction en 5 blocs** (`generation/prompt.py`), règles de restitution
+  **répétées après les exemples** (biais d'attention positionnelle).
+- **Sortie structurée** en propositions élémentaires (`generation/structured.py`).
+- **Client enfichable** (`generation/generate.py`) : régime RÉFÉRENCE via Ollama
+  (compatible OpenAI, température 0,2, 700 jetons, graine) ; régime DÉGRADÉ par
+  composition extractive déterministe. Le régime actif est renvoyé dans le
+  résultat et sera inscrit dans `run_metadata.json`.
+- Vérifié de bout en bout en mode dégradé : la chaîne produit un commentaire
+  **100 % ancré** (exactitude 1,0), la forme d'un commentaire antérieur est
+  reprise **sans aucune de ses valeurs** (`tests/test_src_generation.py`).
+
+**41 tests au total pour le nouveau prototype.**
