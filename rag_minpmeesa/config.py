@@ -264,10 +264,20 @@ def get_settings() -> Settings:
         _SETTINGS = Settings()
         _apply_yaml(_SETTINGS, _SETTINGS.paths.root / "config.yaml")
         _SETTINGS.paths.ensure()
-        # Un backend d'embedding peut être forcé par variable d'environnement,
-        # utile pour reproduire une expérience hors-ligne : RAG_EMBEDDING_BACKEND=tfidf
+        # Surcharges par variables d'environnement — permettent d'activer la
+        # configuration de référence SANS éditer config.yaml (utile pour un
+        # lanceur clé en main) et de rejouer une expérience hors-ligne.
         env_backend = os.environ.get("RAG_EMBEDDING_BACKEND")
         if env_backend in {"auto", "transformer", "tfidf"}:
             _SETTINGS.embedding.backend = env_backend
+        env_synthesis = os.environ.get("RAG_SYNTHESIS")
+        if env_synthesis in {"extractive", "llm"}:
+            _SETTINGS.generation.synthesis = env_synthesis
+        env_llm_url = os.environ.get("RAG_LLM_BASE_URL")
+        if env_llm_url:
+            _SETTINGS.generation.llm_base_url = env_llm_url
+        env_llm_model = os.environ.get("RAG_LLM_MODEL")
+        if env_llm_model:
+            _SETTINGS.generation.llm_model = env_llm_model
         set_global_seed(_SETTINGS.seed)
     return _SETTINGS
