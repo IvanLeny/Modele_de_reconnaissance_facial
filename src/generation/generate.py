@@ -53,10 +53,17 @@ def _appel_llm(prompt: str, base: str, model: str, seed: int = 42,
         "max_tokens": max_tokens,
         "seed": seed,
     }
+    # Clé d'API facultative : requise pour un fournisseur cloud compatible OpenAI
+    # (OpenAI, Groq, Google Gemini…), inutile pour Ollama local. Le protocole est
+    # le même dans les deux cas — seuls l'URL, le modèle et la clé changent.
+    headers = {"Content-Type": "application/json"}
+    api_key = os.environ.get("RAG_LLM_API_KEY", "")
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
     req = urllib.request.Request(
         base.rstrip("/") + "/chat/completions",
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"})
+        headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
             data = json.loads(r.read().decode("utf-8"))
