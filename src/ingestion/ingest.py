@@ -106,3 +106,82 @@ def build_store(corpus_dir: str = "data/corpus", verbose: bool = False) -> Tuple
     store = Store(":memory:")
     ref = populate(store, corpus_dir, verbose)
     return store, ref
+
+
+def _segment_paragraphes(full_text: str, cible: int = 700, maxn: int = 60) -> list:
+    """Découpe un texte en passages d'environ `cible` caractères (notes de
+    conjoncture, documents de contexte), pour les stocker comme vocabulaire.
+    Regroupe les lignes en blocs jusqu'à la taille cible, aux frontières de ligne."""
+    import re
+    lignes = [re.sub(r"\s+", " ", l).strip() for l in full_text.splitlines()]
+    lignes = [l for l in lignes if len(l) > 1]
+    out, buf = [], ""
+    for l in lignes:
+        buf = f"{buf} {l}".strip() if buf else l
+        if len(buf) >= cible:
+            out.append(buf)
+            buf = ""
+            if len(out) >= maxn:
+                return out
+    if buf and len(buf) >= 60:
+        out.append(buf)
+    return out
+
+
+def ingest_document(store, pdf_path: str, verbose: bool = False) -> dict:
+    """Ingère UN document quelconque dans le dépôt, en détectant son type et son
+    exercice à partir du contenu. Annuaire -> valeurs ; rapport -> commentaires
+    appariés ; note/contexte -> paragraphes de vocabulaire. Permet d'enrichir la
+    base à l'avenir (interface « Ingestion » et commande add_document)."""
+    from .metadata import build_meta
+    p = Path(pdf_path)
+    doc = extract_document(str(p))
+    ft = doc.full_text()
+    meta = build_meta(p.stem, p.name, ft, len(doc.pages))
+    ex = meta.exercice or 0
+    store.add_document(meta.doc_id, meta.type, ex, periode=meta.periode,
+                       source_file=p.name, n_pages=meta.n_pages)
+    added = {"doc_id": meta.doc_id, "type": meta.type, "exercice": meta.exercice,
+             "periode": meta.periode, "valeurs": 0, "passages": 0}
+
+    if meta.type == "annuaire":
+        for t in extract_tables(str(p)):
+            for c in t.cellules:
+                store.add_valeur(ValeurRow(exercice=ex, ligne=c.ligne, colonne=c.colonne,
+                                           valeur=c.valeur, doc_id=meta.doc_id, page=t.page))
+                added["valeurs"] += 1
+    elif meta.type == "rapport_analyse":
+        graphs = {g.numero: g.intitule for g in extract_graphiques(str(p))}
+        segments = segmenter_commentaires(str(p))
+        for n, intitule in graphs.items():
+            code = code_indicateur(intitule)
+            store.add_appariement(code, ex, n, None, intitule)
+            texte = segments.get(n, "")
+            if texte:
+                store.add_passage(PassageRow(exercice=ex, code_indicateur=code, texte=texte,
+                                             doc_id=meta.doc_id, section=f"Graphique {n}"))
+                added["passages"] += 1
+    else:  # note_conjoncture / contexte : paragraphes de vocabulaire (sans code)
+        for para in _segment_paragraphes(ft):
+            store.add_passage(PassageRow(exercice=ex, code_indicateur=None, texte=para,
+                                         doc_id=meta.doc_id, section=meta.periode or "contexte"))
+            added["passages"] += 1
+    store.commit()
+    if verbose:
+        print(f"  {p.name} -> type={meta.type}, exercice={meta.exercice}, "
+              f"+{added['valeurs']} valeurs, +{added['passages']} passages")
+    return added
+
+
+def populate_all(store, corpus_dir: str = "data/corpus", verbose: bool = False) -> Referentiel:
+    """Peuple le dépôt avec TOUT le corpus : les couples appariés (avec références
+    d'évaluation) PUIS les autres documents (notes de conjoncture, contexte)."""
+    ref = populate(store, corpus_dir, verbose)
+    corpus = Path(corpus_dir)
+    deja = set()
+    for _, (rap, ann) in COUPLES.items():
+        deja.add(f"{rap}.pdf"); deja.add(f"{ann}.pdf")
+    for pdf in sorted(corpus.glob("*.pdf")):
+        if pdf.name not in deja:
+            ingest_document(store, str(pdf), verbose=verbose)
+    return ref

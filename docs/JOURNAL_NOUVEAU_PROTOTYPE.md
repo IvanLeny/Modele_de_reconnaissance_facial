@@ -246,3 +246,21 @@ validation manuelle de la table d'appariement (double saisie + kappa).
 - L'ingestion est factorisée (`ingest.populate`) : le MÊME code peuple SQLite ou
   PostgreSQL. La bascule se fait par la variable RAG_PG_DSN / `config.yaml`.
 - Environnement cible relevé : **PostgreSQL 18** (§3.1.5).
+
+## Maintenance — ajout de documents à la base (§3.1.5)
+
+La base est **enrichissable à l'avenir**, directement depuis le prototype :
+- `src/ingestion/ingest.py:ingest_document` ingère UN document quelconque en
+  détectant son type et son exercice (annuaire → valeurs ; rapport →
+  commentaires appariés ; note/contexte → paragraphes de vocabulaire) ;
+- `src/ingestion/populate_all` peuple la base avec **les 18 documents** (les 6
+  notes de conjoncture et les 4 documents de contexte sont désormais inclus,
+  soit 426 passages de vocabulaire en plus) ;
+- commande de maintenance : `python -m src.ingestion.add_document "<pdf>"`
+  ajoute un nouveau PDF à la base PostgreSQL sans tout réingérer ;
+- l'espace **« Ingestion »** de l'interface Streamlit permet de **déposer un PDF**
+  qui entre dans la base (persistant si RAG_PG_DSN est défini).
+
+L'évaluation reste fondée sur les seuls couples appariés (`populate`), donc les
+chiffres du chapitre 4 sont inchangés ; l'enrichissement documentaire sert le
+vocabulaire et l'usage opérationnel.

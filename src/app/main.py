@@ -50,10 +50,42 @@ if "valides" not in st.session_state:
 
 # --------------------------------------------------------------------------- #
 if onglet == "Ingestion":
-    st.header("Corpus ingéré")
+    import os
+    import tempfile
+    st.header("Espace 1 — Ingestion d'un document")
     exercices = sorted({e for (e, _) in ref.reference})
     st.write(f"**{len(ref.reference)}** unités évaluables (indicateur × exercice), "
              f"exercices {exercices}.")
+
+    st.subheader("Ajouter un document à la base")
+    persistant = bool(os.environ.get("RAG_PG_DSN"))
+    st.caption("Base persistante PostgreSQL détectée : l'ajout est durable."
+               if persistant else
+               "Mode session (SQLite en mémoire) : l'ajout vaut pour cette session. "
+               "Définissez RAG_PG_DSN pour un ajout persistant en base PostgreSQL.")
+    up = st.file_uploader("Déposer un PDF (annuaire, rapport, note, contexte)", type="pdf")
+    if up is not None and st.button("Ingérer ce document"):
+        from src.ingestion.ingest import ingest_document
+        tmp = os.path.join(tempfile.gettempdir(), up.name)
+        with open(tmp, "wb") as f:
+            f.write(up.getbuffer())
+        try:
+            if persistant:
+                from src.retrieval.pg_store import PostgresStore
+                cible = PostgresStore(os.environ["RAG_PG_DSN"])
+                cible.create_schema()
+            else:
+                cible = store
+            added = ingest_document(cible, tmp, verbose=False)
+            st.success(f"Document ajouté : **{added['doc_id']}** — type *{added['type']}*, "
+                       f"exercice {added['exercice']}, +{added['valeurs']} valeurs, "
+                       f"+{added['passages']} passages.")
+            if persistant:
+                st.write("Contenu de la base :", cible.compter())
+        except Exception as e:
+            st.error(f"Échec de l'ingestion : {type(e).__name__} : {e}")
+
+    st.divider()
     st.caption("Les valeurs proviennent des Annuaires ; les commentaires de "
                "référence, des Rapports d'analyse (segmentés par graphique).")
 

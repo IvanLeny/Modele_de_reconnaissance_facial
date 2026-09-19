@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 import sys
 
-from .ingest import populate
+from .ingest import populate_all
 from ..retrieval.pg_store import PostgresStore
 
 
@@ -35,8 +35,8 @@ def main() -> int:
     store.create_schema()
     print("2/4  Réinitialisation des tables…")
     store.reset()
-    print("3/4  Ingestion du corpus dans PostgreSQL…")
-    populate(store, verbose=True)
+    print("3/4  Ingestion du corpus COMPLET dans PostgreSQL (18 documents)…")
+    populate_all(store, verbose=True)
 
     print("4/4  Vérification du filtrage temporel (aucun passage postérieur)…")
     ok = True
