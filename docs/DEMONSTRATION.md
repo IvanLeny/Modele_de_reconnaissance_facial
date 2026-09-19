@@ -1,111 +1,67 @@
-# Scénario de démonstration (démarche §10)
+# Scénario de démonstration — assistant de rédaction des commentaires (Étape 10)
 
-Cinq requêtes exécutées sur le prototype illustrent les propriétés non
-négociables du système (démarche §0). **Tous les extraits ci-dessous sont des
-sorties réelles du moteur**, reproductibles par :
+Cinq temps, **sorties réelles du prototype** (reproductibles). Les temps 3 et 4
+sont ceux qui rendent visible la garantie centrale du travail.
 
-```bash
-python -m rag_minpmeesa.app.cli query "…" --mode production   # ou --mode consultation
-```
+Commande : `python -m src.app.cli demo` (ou l'interface : `streamlit run src/app/main.py`).
 
-Régime d'exécution : hors-ligne (index `tfidf-lsa`, réordonnanceur à traits).
-La configuration de référence (transformeur + cross-encodeur + LLM local)
-produit les mêmes garde-fous, avec une rédaction plus fluide.
+Régime ci-dessous : **dégradé (extractif)**, faute de LLM dans l'environnement de
+construction. Sur la machine cible, Ollama produit une prose fluide ; **les
+garde-fous, eux, sont identiques dans les deux régimes** (ils opèrent après la
+génération).
 
 ---
 
-## 1. Réponse sourcée — chaque énoncé porte sa référence
+## 1. Commentaire produit, avec ses références
 
-**Requête (production)** : « Quelle est la répartition du stock des PME par
-région ? »
+Indicateur : « Répartition du stock de PME en 2023 par région », exercice 2023.
 
-> • *DONNÉES STATISTIQUES SUR LES PME — Tableau 4 : Répartition du stock des PME
-> estimé en 2023 selon la Région…*
-> **[Annuaire statistique 2022 sur les PMEESA, p. 16]**
+> • Pour l'exercice 2023, Stock des PME | 2018 s'établit à **255 059**.
+>    ↳ source : annuaire_2023, exercice 2023, tableau apparié [donnée]
+> • Pour l'exercice 2023, Stock des PME | 2019 (e) s'établit à **287 376**.
+>    ↳ source : annuaire_2023, exercice 2023, tableau apparié [donnée]
+> …
 
-- Exactitude chiffrée : **1.00** (232 / 232 nombres sourcés)
-- Fidélité : **1.00** (tous les énoncés soutenus par le contexte)
+**Exactitude : 1,00** (toutes les valeurs proviennent du tableau de l'exercice).
+Chaque proposition porte sa **référence** (affichage clé n°1).
 
-Le passage tabulaire est retrouvé d'un seul tenant, en-tête et valeurs
-solidaires ; la référence (document + page) accompagne l'énoncé.
+## 2. Le même, sans ancrage documentaire (C0)
 
----
+Sans les commentaires homologues antérieurs, la génération ne dispose plus du
+« patron » de rédaction : elle énumère les valeurs sans en reprendre la forme.
+C'est ce que mesure l'écart C1 ≫ C0 (+0,163 de ROUGE-1, cf. chapitre 4).
 
-## 2. Donnée chiffrée reprise littéralement
+## 3. Contrôle — une valeur d'un commentaire antérieur est écartée
 
-**Requête (production)** : « Quelle proportion de PME déclarait une trésorerie
-difficile au 2ᵉ trimestre 2024 ? »
+Brouillon citant **393 166** (valeur annoncée par un rapport antérieur), alors
+que l'Annuaire de l'exercice indique 393 175 (estimation révisée) :
 
-> • *Par contre l'année dernière à la même période, 52,2 % de PME déclaraient
-> une trésorerie difficile…*
-> **[Note de conjoncture - 2e trimestre 2024, p. 10-11]**
+> ✗ ÉCARTÉE (valeur non sourcée ['393166']) : « Le stock de PME atteint 393 166 unités. »
 
-- Exactitude chiffrée : **1.00** (25 / 25)
+Exactitude 0,00 → la proposition est **retirée** (affichage clé n°2). C'est la
+règle de portée : une valeur ne vaut que si elle figure dans le bloc de données
+de l'exercice, jamais parce qu'un commentaire passé la mentionnait.
 
-Le pourcentage `52,2 %` est repris **verbatim** de la source : aucun recalcul,
-aucun arrondi. C'est la première propriété non négociable — le système ne peut
-pas se tromper sur un nombre.
+## 4. Contrôle — une valeur inventée est écartée
 
----
+> ✗ ÉCARTÉE (valeur non sourcée ['5,9']) : « La croissance atteint 5,9 %. »
 
-## 3. Abstention sur une requête hors périmètre
+Le bloc de données ne contient que 2,4 % : la valeur inventée est **retirée**.
 
-**Requête (production)** : « Qui a remporté la dernière Coupe d'Afrique des
-Nations ? »
+## 5. Abstention — indicateur hors périmètre
 
-> ⚠ **Aucune source suffisamment pertinente n'a été trouvée dans le corpus
-> autorisé pour ce mode (confiance lexicale 8.74 < seuil 12.00). Le système
-> s'abstient de répondre plutôt que de produire une synthèse mal étayée.**
+> ⚠ Abstention : aucun tableau apparié ou aucune valeur pour l'exercice.
 
-Le sujet est absent du corpus MINPMEESA. La confiance lexicale (meilleur BM25 =
-8,74) tombe sous le seuil calibré (12,0, cf. `docs/JOURNAL.md` §5). Le système
-**sait ne pas répondre** — troisième propriété non négociable.
+Sans tableau apparié ni valeurs, le système **s'abstient** plutôt que de fonder
+un commentaire sur rien (affichage clé n°3).
 
 ---
 
-## 4. Cloisonnement des modes
+## Propriétés démontrées (cahier des charges §0)
 
-**Requête** : « mesures d'appui à 200 entreprises, 1er trimestre 2025 »
-
-- **Mode production** : les documents internes de travail (notes non validées)
-  sont accessibles et peuvent être restitués.
-- **Mode consultation** (décideurs) : la même requête ne renvoie **que** des
-  passages publiés ; aucun passage interne n'apparaît.
-
-Le cloisonnement est appliqué au **filtrage de la base**, avant tout scoring
-(cf. `rag_minpmeesa/retrieval/filters.py`), et vérifié sur l'intégralité du
-corpus par le test `test_cloisonnement_couvre_tout_le_corpus`. Ce n'est jamais
-un simple filtre d'affichage — deuxième propriété non négociable.
-
----
-
-## 5. Garde-fou numérique : rejet d'une valeur non sourcée
-
-Ce garde-fou protège le **mode LLM** (rédaction par un modèle local). Sur un
-brouillon qui introduirait un nombre absent des sources :
-
-> Brouillon : « Le stock des PME atteint 393 954 entreprises, soit une hausse de
-> **12,5 %** sur un an. »
-> Sources : « Le stock des PME est estimé à 393 954 entreprises en 2023. »
-
-Audit numérique réel :
-
-```
-exactitude 0.50  (1 / 2 nombres sourcés)
-valeurs rejetées : ['12,5']
-```
-
-`393 954` est validé (présent dans la source) ; `12,5 %`, absent, est **signalé
-et retiré**. En mode extractif (défaut souverain), ce cas ne peut pas survenir :
-la synthèse est composée de phrases déjà présentes dans les sources.
-
----
-
-## Synthèse des propriétés démontrées
-
-| # | Propriété non négociable (démarche §0)                | Démonstration |
-|---|-------------------------------------------------------|---------------|
-| 1 | Ne peut pas se tromper sur un nombre                  | §2, §5        |
-| 2 | Ne peut pas divulguer une donnée non publiée         | §4            |
-| 3 | Sait s'abstenir                                       | §3            |
-| 4 | Tout est tracé et sourcé                              | §1, §2        |
+| # | Propriété | Temps |
+|---|-----------|-------|
+| 1 | Ne peut pas se tromper sur un chiffre | 1, 3, 4 |
+| 2 | Le patron vient du passé, les valeurs du présent | 1, 2, 3 |
+| 3 | Aucune information postérieure à l'exercice | (filtrage temporel, testé) |
+| 4 | Chaque énoncé sourcé ; s'abstient sinon | 1, 5 |

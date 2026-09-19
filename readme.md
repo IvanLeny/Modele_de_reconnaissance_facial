@@ -1,211 +1,171 @@
-# Système RAG hybride pour le patrimoine documentaire du MINPMEESA
+# Assistant de rédaction des commentaires statistiques — MINPMEESA
 
-> **Mémoire de Master 2** — *Conception et évaluation d'un système intelligent
-> fondé sur une architecture RAG hybride pour l'exploitation du patrimoine
-> documentaire du MINPMEESA, en appui à la production de l'Annuaire statistique
-> et du Rapport annuel de performance.*
+> **Mémoire de Master 2** — *Conception et évaluation d'un dispositif d'aide à la
+> rédaction des commentaires analytiques accompagnant les publications
+> statistiques du MINPMEESA, sous garanties de fidélité et de traçabilité.*
 >
 > Adnane MAMA IDISSA — M2 Data Science et Modélisation Statistique (MDSMS), ISSEA-CEMAC.
 
-Ce dépôt contient l'**artefact logiciel** du mémoire : un système de génération
-augmentée par récupération (RAG) *hybride*, *traçable* et *souverain*, conçu pour
-interroger en langage naturel les documents du ministère et restituer des
-réponses **sourcées**, avec une garantie forte sur les **données chiffrées**.
+Ce dépôt contient l'**artefact logiciel** du mémoire. Le système **assiste la
+rédaction** des commentaires qui accompagnent les tableaux de l'Annuaire
+statistique, et produit une **note d'analyse de perspective** transversale pour
+l'aide à la décision — le tout **100 % local**, **traçable** et **sans jamais se
+tromper sur un chiffre**.
 
 ---
 
-## 🚀 Démarrage en un clic
+## ⚠️ Un seul système fait foi : `src/`
 
-Une fois le projet sur votre ordinateur (`git clone …` puis `git checkout claude/rag-system-memoir-ra02r7`) :
-
-- **Windows** : double-cliquez sur **`demarrer.bat`** (ou, dans le dossier du projet, tapez `demarrer.bat`).
-- **macOS / Linux** : dans le dossier du projet, tapez `bash demarrer.sh`.
-
-Le lanceur installe les dépendances (la 1re fois), construit l'index (la 1re fois,
-1 à 2 minutes) puis ouvre l'application dans votre navigateur. Les fois suivantes,
-il ouvre directement l'application. Pour l'arrêter : `Ctrl+C` dans la fenêtre.
-
-> Tout se passe **localement** sur votre machine ; le corpus est déjà inclus dans `data/corpus/`.
+Le dépôt contient encore un **ancien** paquet `rag_minpmeesa/` (un chatbot
+question→réponse, première version abandonnée). **Ne t'y réfère plus.** Le
+système du mémoire est **`src/`**, décrit ci-dessous. L'ancien sera retiré (voir
+[§ Nettoyage](#nettoyage)).
 
 ---
-
-## ✨ Trois usages dans une seule interface
-
-L'application web (Streamlit) est organisée en trois onglets :
-
-1. **🔎 Interroger** — poser une question en langage naturel ; réponse **sourcée**,
-   toute donnée chiffrée reprise littéralement de sa source (deux modes :
-   production / consultation).
-2. **📋 Collecte pour l'Annuaire** — réunir, **par rubrique de l'Annuaire**
-   (stock des PME, emploi, trésorerie, inflation, appui aux PME…), les constats et
-   chiffres sourcés à **transcrire dans l'Annuaire statistique**, exportables en
-   CSV ou Markdown. C'est l'appui direct à la production de l'Annuaire.
-3. **⚙️ Mettre à jour la documentation** — **ajouter, remplacer ou retirer** des
-   documents du corpus (téléversement de PDF + métadonnées), déposer le **logo**
-   de la structure, puis **reconstruire l'index** — le tout sans toucher au code.
-
-Charte visuelle aux **couleurs du MINPMEESA** (vert / rouge / jaune) ; le logo
-s'affiche dès qu'il est déposé (`rag_minpmeesa/app/assets/logo.png` ou via
-l'onglet de mise à jour).
 
 ## 1. Ce que fait le système
 
-- **Ingère** l'Annuaire statistique et les Notes de conjoncture (PDF) : extraction
-  sensible aux colonnes, nettoyage, segmentation, métadonnées.
-- **Indexe** le corpus deux fois : recherche **lexicale** (BM25) et recherche
-  **sémantique** (vecteurs denses).
-- **Récupère** par une chaîne **hybride** : filtrage → fusion des classements
-  (RRF) → réordonnancement (reranking).
-- **Restitue** une synthèse **ancrée dans les sources**, où **toute donnée
-  chiffrée est reprise littéralement** du passage d'origine et accompagnée de sa
-  référence (garde-fou contre l'hallucination numérique).
-- Fonctionne selon **deux modes** : *production* (agents, corpus interne + publié)
-  et *consultation* (décideurs, corpus publié uniquement), avec **cloisonnement**
-  strict des documents internes.
+Le système ne répond **pas** à des questions libres : il **rédige des
+commentaires** sous garanties. Deux productions :
 
-## 2. Structure du dépôt
+### a) Commentaire d'un indicateur
+Pour un **indicateur** et un **exercice** donnés, il reçoit :
+- les **valeurs** du tableau de cet indicateur (Annuaire de l'exercice) ;
+- les **commentaires des éditions antérieures** du même indicateur ;
+
+et produit un **paragraphe de commentaire** en registre institutionnel.
+
+### b) Note d'analyse de perspective (aide à la décision)
+À partir de **tout le corpus** (annuaires, rapports, notes de conjoncture,
+documents de contexte), il produit une **note transversale** structurée destinée
+à **éclairer la décision** du responsable — sous les mêmes garde-fous.
+
+## 2. Les quatre garanties non négociables
+
+1. **Jamais faux sur un nombre.** Tout chiffre est cité **littéralement** depuis
+   sa source ; une valeur non retrouvée dans les données est **écartée**.
+2. **Le patron vient du passé, les valeurs du présent.** On réutilise la *forme*
+   des commentaires antérieurs, **jamais leurs valeurs**.
+3. **Aucune information postérieure** à l'exercice traité (filtre temporel
+   `WHERE exercice < N` au niveau de la requête).
+4. **Chaque énoncé porte sa référence** ; en l'absence de sources suffisantes, le
+   système **s'abstient** explicitement.
+
+Ces garanties sont **indépendantes du modèle** : elles s'appliquent *après*
+génération (`src/guards/`), que le texte vienne d'un LLM ou du repli extractif.
+
+## 3. Architecture réelle
 
 ```
-rag_minpmeesa/            # le paquet Python (artefact)
-  config.py               # 3.1  configuration, modes, seuils a priori
-  engine.py               # 3.1  moteur de haut niveau (point d'entrée)
-  schema.py               # 3.2  modèle de données (Document, Chunk, Result)
-  ingestion/              # 3.2  extraction → nettoyage → segmentation → métadonnées
-  index/                  # 3.3  BM25 + vecteurs (backends enfichables)
-  retrieval/              # 3.4  filtres + fusion RRF + reranking
-  generation/             # 3.5–3.6  contexte, restitution, garde-fous numériques
-  evaluation/             # 4    métriques, jeu de test, protocole complet
-  app/                    # 3.7  interfaces CLI et web (Streamlit)
-data/
-  corpus/                 # les PDF + registry.json (métadonnées + statut)
-  gold/                   # jeu de test annoté (chapitre 4.1)
-  results/                # rapport d'évaluation (JSON + Markdown)
-docs/                     # ARCHITECTURE.md + plan du mémoire
-tests/                    # tests unitaires et d'intégration
+(indicateur, exercice)                      ← entrée : pas une question libre
+        │
+        ▼
+ Assemblage du contexte  ── filtre temporel (exercice < N) + filtre par type
+        │                    · valeurs de l'exercice (tableaux Annuaire)
+        │                    · commentaires antérieurs du même indicateur
+        │                      (code exact + similarité d'intitulé)
+        ▼
+ Table d'appariement  ── code indicateur stable d'une édition à l'autre
+        │                (graphique du rapport ↔ tableau de l'annuaire)
+        ▼
+      Génération  ── LLM local (Ollama) OU cloud OpenAI-compatible
+        │            OU repli extractif déterministe (mode dégradé)
+        ▼
+     Garde-fous  ── citation littérale · provenance · abstention
+        ▼
+ Commentaire + sources + régime          ← sortie tracée et validable
 ```
 
-Documentation détaillée :
-- [`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md) — **outils utilisés et fonctionnalités** (guide complet).
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — carte détaillée code ↔ chapitres du mémoire.
+> Détail complet et correspondance avec ton schéma initial :
+> [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-## 3. Installation
+## 4. Démarrage rapide (mode dégradé, immédiat, hors-ligne)
+
+Aucun modèle requis : la chaîne s'exécute et s'évalue entièrement en local.
 
 ```bash
 pip install -r requirements.txt
+
+python -m src.app.cli demo                 # démonstration en 5 temps
+python -m src.app.cli generer --exercice 2023 --n 0
+python -m src.app.cli perspective --exercice 2023   # note de perspective
+python -m src.eval.runner                  # harnais d'évaluation (CSV)
+python -m src.eval.stats                   # statistiques + figures 300 dpi
+streamlit run src/app/main.py              # interface (4 espaces)
+pytest tests/test_src_*.py -q              # tests
 ```
 
-Le socle est **100 % exécutable hors-ligne** (aucun modèle à télécharger).
-Pour la **configuration de référence** (déploiement local souverain avec un
-encodeur de phrases multilingue et un cross-encodeur), installer en plus :
+## 5. Régime de référence (rédaction par un LLM)
+
+Le code parle le protocole **OpenAI** (`/chat/completions`). Trois variables
+d'environnement suffisent — **aucune ligne de code à changer**.
+
+### Option A — Ollama **local** (déploiement souverain, recommandé pour le mémoire)
+```bash
+ollama pull llama3.1:8b
+set RAG_LLM_BASE_URL=http://localhost:11434/v1
+set RAG_LLM_MODEL=llama3.1:8b
+```
+
+### Option B — Cloud OpenAI-compatible (**dépannage** de développement)
+Utile si le téléchargement local échoue. ⚠️ Contredit la souveraineté : à réserver
+au banc d'essai, en le signalant dans le mémoire.
+```bash
+set RAG_LLM_BASE_URL=https://api.groq.com/openai/v1
+set RAG_LLM_MODEL=llama-3.1-8b-instant
+set RAG_LLM_API_KEY=gsk_votre_cle
+```
+
+Le **régime** effectif est inscrit dans chaque sortie
+(`référence (llm:…)` vs `dégradé (extractif)`).
+
+## 6. Base persistante PostgreSQL (machine cible)
 
 ```bash
-pip install fastembed            # ou : sentence-transformers
+set RAG_PG_DSN=host=localhost dbname=minpmeesa user=postgres password=VOTRE_MDP
+python -m src.ingestion.ingest_postgres        # ingère les 18 documents
+python -m src.ingestion.add_document "chemin\vers\nouveau.pdf"   # enrichir la base
 ```
 
-Le système détecte automatiquement le meilleur backend disponible et bascule sur
-le substitut hors-ligne (TF-IDF/LSA + réordonnanceur à traits) si aucun modèle
-pré-entraîné n'est accessible.
+La base est **mise à jour depuis l'interface** (onglet Ingestion) ou en CLI.
 
-## 4. Utilisation
+## 7. Structure du dépôt (`src/`)
 
-### Ligne de commande
+```
+src/
+  ingestion/     extraction PDF · tableaux · métadonnées · appariement · ingestion
+  pairing/       table d'appariement (code indicateur stable entre éditions)
+  retrieval/     store SQLite / PostgreSQL · assemblage du contexte (filtre temporel)
+  generation/    prompt · génération (LLM/extractif) · note de perspective
+  guards/        garde-fous : numérique · provenance · abstention
+  eval/          harnais C0-C4 + baseline · métriques · statistiques + figures
+  app/           interfaces CLI et web (Streamlit)
+data/corpus/     18 PDF (annuaires, rapports, notes de conjoncture, contexte)
+db/schema_pg.sql schéma PostgreSQL (sans pgvector, portable)
+docs/            ARCHITECTURE.md · INSTALLATION.md · DEMONSTRATION.md · JOURNAL.md
+tests/           tests unitaires (test_src_*.py)
+```
+
+## 8. Ordre conseillé pour la soutenance
+
+1. `python -m src.app.cli demo` — montre les garanties (contrôle, abstention).
+2. `streamlit run src/app/main.py` — génération d'un commentaire, validation humaine.
+3. `python -m src.app.cli perspective --exercice 2024` — note d'aide à la décision.
+4. `python -m src.eval.runner` puis `python -m src.eval.stats` — chiffres + figures.
+
+## Nettoyage
+
+Le paquet `rag_minpmeesa/`, les anciens tests (`test_system.py`,
+`test_ingestion.py`) et les docs dupliquées (`*_NOUVEAU*.md`) sont **obsolètes**
+(leur contenu à jour est désormais dans les fichiers canoniques). Ils peuvent
+être retirés sans risque (l'historique git les conserve) :
 
 ```bash
-# 1) Construire l'index à partir du corpus
-python -m rag_minpmeesa.app.cli build
-
-# 2) Interroger — mode production (agents)
-python -m rag_minpmeesa.app.cli query \
-  "Quelle est la répartition du stock des PME par région en 2023 ?" --mode production
-
-# 3) Interroger — mode consultation (décideurs)
-python -m rag_minpmeesa.app.cli query \
-  "Quel a été le taux de croissance du Cameroun au 2e trimestre 2024 ?" --mode consultation
-
-# 4) Lancer l'évaluation complète (chapitre 4)
-python -m rag_minpmeesa.app.cli eval
+git rm -r rag_minpmeesa tests/test_system.py tests/test_ingestion.py
+git rm docs/INSTALLATION_NOUVEAU.md docs/DEMONSTRATION_NOUVEAU.md docs/JOURNAL_NOUVEAU_PROTOTYPE.md
 ```
-
-### Interface web
-
-```bash
-streamlit run rag_minpmeesa/app/streamlit_app.py
-```
-
-Sélecteur de mode, filtres par métadonnées, synthèse sourcée, passages dépliables
-et tableau de bord des contrôles qualité (exactitude chiffrée, fidélité).
-
-### En Python
-
-```python
-from rag_minpmeesa.engine import RAGEngine
-from rag_minpmeesa.config import Mode
-
-eng = RAGEngine().ensure_ready()
-ans = eng.query("trésorerie des PME au 2e trimestre 2024", mode=Mode.PRODUCTION)
-print(ans.summary)                     # synthèse sourcée
-print(ans.numeric_audit.to_dict())     # audit des données chiffrées
-print(ans.sources)                     # références citées
-```
-
-### Restitution par un LLM local (optionnelle)
-
-Pour activer la rédaction par un modèle de langage **local** (p. ex. Ollama), sous
-la contrainte des garde-fous numériques :
-
-```bash
-export RAG_LLM_BASE_URL="http://localhost:11434/v1"
-export RAG_LLM_MODEL="llama3"
-# puis, dans config.py : GenerationConfig.synthesis = "llm"
-```
-
-## 5. Résultats d'évaluation
-
-Le protocole (chapitre 4) produit une **étude d'ablation** de la récupération,
-l'évaluation de la **restitution ancrée**, le **test de cloisonnement** et la
-**validation des hypothèses** au regard des seuils fixés *a priori* (Tableau A.3).
-Le rapport complet est régénéré dans [`data/results/evaluation.md`](data/results/evaluation.md).
-
-Faits saillants (jeu de test de 18 questions annotées) :
-
-- **Restitution ancrée** : fidélité **1,00**, **exactitude chiffrée 1,00**
-  (100 % des nombres restitués sont sourcés) → **H3 validée**.
-- **Cloisonnement** : **0 % de fuite** de documents internes en mode consultation.
-- **Récupération** : la chaîne hybride se classe au niveau des meilleures
-  configurations simples sur nDCG@5 et MRR ; le reranking améliore la précision
-  du sommet de liste (Precision@3).
-
-> **Note de reproductibilité.** Cet environnement n'a pas accès aux modèles
-> pré-entraînés : les chiffres du dépôt sont obtenus avec les **substituts
-> hors-ligne**. La configuration de référence (encodeur multilingue +
-> cross-encodeur) est attendue au-dessus de ces valeurs sur la complémentarité
-> hybride (H1) et l'apport du reranking (H2). Le protocole et les seuils sont
-> identiques ; seuls les modèles changent. Les hypothèses H4/H5 (gain de temps)
-> relèvent d'un protocole terrain auprès des agents et décideurs.
-
-## 6. Tests
-
-```bash
-pytest -q
-```
-
-Les tests vérifient les propriétés de conception : citation littérale des nombres,
-cloisonnement des modes, correction de la fusion RRF et des métriques.
-
-## 7. Corpus
-
-| Document | Type | Statut | Année |
-|---|---|---|---|
-| Annuaire statistique 2022 sur les PMEESA | annuaire | publié | 2022 |
-| Note de conjoncture — 2e trimestre 2024 | conjoncture | publié | 2024 |
-| Note de conjoncture — 3e trimestre 2024 | conjoncture | publié | 2024 |
-| Note de conjoncture — 1er trimestre 2025 | conjoncture | *interne* | 2025 |
-
-Le statut de diffusion (`data/corpus/registry.json`) est une décision de
-déploiement du ministère ; la note T1-2025 est marquée *interne* pour **démontrer
-et évaluer** le cloisonnement des deux modes.
 
 ---
 
-*Projet académique — ISSEA-CEMAC. Les données proviennent des publications du
-MINPMEESA (Division des Études, des Projets et de la Prospective).*
+*Projet académique — ISSEA-CEMAC. Données issues des publications du MINPMEESA
+(Division des Études, des Projets et de la Prospective).*
