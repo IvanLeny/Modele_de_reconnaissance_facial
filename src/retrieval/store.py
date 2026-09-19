@@ -126,6 +126,20 @@ class Store:
                 out.append(r)
         return out
 
+    def passages_par_type(self, type_doc: str, limit: int = 8, exercice_max: Optional[int] = None) -> List[sqlite3.Row]:
+        """Passages issus des documents d'un type donné (ex. note_conjoncture,
+        contexte), les plus récents d'abord. Sert à la note de perspective, qui
+        synthétise l'ensemble du corpus."""
+        q = ("SELECT p.*, d.type AS doc_type, d.periode AS periode FROM passages p "
+             "JOIN documents d ON d.doc_id=p.doc_id WHERE d.type=?")
+        args = [type_doc]
+        if exercice_max is not None:
+            q += " AND p.exercice <= ?"
+            args.append(exercice_max)
+        q += " ORDER BY p.exercice DESC, p.id ASC LIMIT ?"
+        args.append(limit)
+        return self.conn.execute(q, args).fetchall()
+
     def valeurs_indicateur(self, exercice: int, intitule: str, limit: int = 40) -> List[sqlite3.Row]:
         """Valeurs de l'exercice dont les libellés (ligne/colonne) recoupent
         l'intitulé de l'indicateur. Filtrage par tokens (le lien exact

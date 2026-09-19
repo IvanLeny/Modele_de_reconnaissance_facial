@@ -264,3 +264,25 @@ La base est **enrichissable à l'avenir**, directement depuis le prototype :
 L'évaluation reste fondée sur les seuls couples appariés (`populate`), donc les
 chiffres du chapitre 4 sont inchangés ; l'enrichissement documentaire sert le
 vocabulaire et l'usage opérationnel.
+
+## Extension — Note d'analyse de perspective (aide à la décision)
+
+À la demande de l'encadrement, le prototype produit aussi une **note d'analyse
+de perspective** transversale, à partir de TOUT le corpus (annuaires, rapports,
+notes de conjoncture, contexte), pour éclairer la décision.
+
+- `src/generation/perspective.py` : assemblage d'un contexte global (chiffres-clés
+  de l'exercice, signaux de conjoncture récents, notes de perspective comme
+  modèle de forme), instruction structurée (Situation / Dynamiques / Points
+  d'attention / Perspectives), génération LLM (référence) ou squelette extractif
+  ancré (dégradé). Filtrage des passages non informatifs (en-têtes, sommaires).
+- **Mêmes garde-fous** : tout nombre cité est repris littéralement des
+  chiffres-clés (bloc de données) ; une valeur non appariée est écartée et
+  signalée ; la partie prospective est de la prose sourcée, sans chiffre inventé ;
+  abstention si les chiffres-clés manquent.
+- Accès : commande `python -m src.app.cli perspective --exercice 2024` et espace
+  « Note de perspective » de l'interface (export Markdown). Test :
+  `tests/test_src_perspective.py`.
+
+Vérifié en régime dégradé : note structurée, ancrée (exactitude jusqu'à 1,0),
+sources listées ; s'abstient sur une base sans chiffres-clés.

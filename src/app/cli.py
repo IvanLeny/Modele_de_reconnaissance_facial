@@ -82,6 +82,24 @@ def cmd_demo(args):
     print("=" * 78)
 
 
+def cmd_perspective(args):
+    """Produit une note d'analyse de perspective à partir de tout le corpus."""
+    from ..retrieval.store import Store
+    from ..ingestion.ingest import populate_all
+    from ..generation.perspective import generer_note
+    store = Store(":memory:")
+    populate_all(store)
+    note = generer_note(store, args.exercice)
+    print("=" * 78)
+    print(note.texte)
+    print("=" * 78)
+    if note.audit is not None:
+        print(f"CONTRÔLE : exactitude {note.audit.exactitude:.2f} ; "
+              f"{len(note.audit.ecartees)} proposition(s) écartée(s) par le garde-fou.")
+    print("RÉGIME :", note.regime)
+    print("SOURCES :", ", ".join(note.sources))
+
+
 def cmd_generer(args):
     store, ref = build_store(verbose=False)
     cible = [k for k in ref.reference if k[0] == args.exercice]
@@ -106,6 +124,9 @@ def main(argv=None):
     g.add_argument("--exercice", type=int, default=2023)
     g.add_argument("--n", type=int, default=0, help="indice de l'indicateur")
     g.set_defaults(func=cmd_generer)
+    pp = sub.add_parser("perspective", help="note d'analyse de perspective (aide à la décision)")
+    pp.add_argument("--exercice", type=int, default=2023)
+    pp.set_defaults(func=cmd_perspective)
     args = p.parse_args(argv)
     args.func(args)
 

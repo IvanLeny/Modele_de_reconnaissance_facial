@@ -42,8 +42,19 @@ def charger():
     return build_store(verbose=False)
 
 
+@st.cache_resource
+def charger_complet():
+    """Base complète (18 documents) pour la note de perspective."""
+    from src.retrieval.store import Store
+    from src.ingestion.ingest import populate_all
+    s = Store(":memory:")
+    populate_all(s)
+    return s
+
+
 store, ref = charger()
-onglet = st.sidebar.radio("Espace", ["Ingestion", "Génération", "Export validé"])
+onglet = st.sidebar.radio("Espace", ["Ingestion", "Génération",
+                                     "Note de perspective", "Export validé"])
 
 if "valides" not in st.session_state:
     st.session_state["valides"] = []
@@ -128,6 +139,26 @@ elif onglet == "Génération":
                     for a in audit.ecartees:                                  # affichage clé n°2
                         st.error(f"✗ Valeur non sourcée {a.valeurs_non_soutenues} — "
                                  f"« {a.proposition.texte} »")
+
+# --------------------------------------------------------------------------- #
+elif onglet == "Note de perspective":
+    from src.generation.perspective import generer_note
+    st.header("Note d'analyse de perspective — aide à la décision")
+    st.caption("Synthèse transversale de TOUT le corpus (annuaires, rapports, "
+               "notes de conjoncture, contexte), sous les mêmes garde-fous : "
+               "chiffres cités littéralement, sources attachées, abstention sinon.")
+    exs = sorted({e for (e, _) in ref.reference})
+    ex = st.selectbox("Exercice de référence", exs, index=len(exs) - 1)
+    if st.button("Produire la note"):
+        note = generer_note(charger_complet(), ex)
+        st.caption(f"Régime : {note.regime} — sources : {', '.join(note.sources)}")
+        st.markdown(note.texte)
+        if note.audit is not None and note.audit.ecartees:
+            st.subheader("Valeurs écartées par le contrôle")
+            for a in note.audit.ecartees:
+                st.error(f"✗ {a.valeurs_non_soutenues} — « {a.proposition.texte[:120]} »")
+        st.download_button("Exporter la note (Markdown)", note.texte,
+                           file_name=f"note_perspective_{ex}.md")
 
 # --------------------------------------------------------------------------- #
 elif onglet == "Export validé":
